@@ -17,9 +17,10 @@ LOCAL_PATH := $(call my-dir)
 # and setting the include path for library-specific header files
 
 include $(CLEAR_VARS)
+
 LOCAL_MODULE := QCAR-prebuilt
 LOCAL_SRC_FILES = ../../vuforia-sdk/build/lib/$(TARGET_ARCH_ABI)/libQCAR.so
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../vuforia-sdk/build/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../vuforia-sdk/build/include 
 include $(PREBUILT_SHARED_LIBRARY)
 
 #-----------------------------------------------------------------------------
@@ -32,6 +33,8 @@ include $(PREBUILT_SHARED_LIBRARY)
 # all variables are global.
 
 include $(CLEAR_VARS)
+
+include ../OpenCV-2.4.2-android-sdk/sdk/native/jni/OpenCV.mk
 
 # The LOCAL_MODULE variable must be defined to identify each module you
 # describe in your Android.mk. The name must be *unique* and not contain
@@ -73,7 +76,7 @@ LOCAL_CFLAGS := -Wno-write-strings $(OPENGLES_DEF)
 # with the "-l" prefix.
 
 LOCAL_LDLIBS := \
-    -llog $(OPENGLES_LIB)
+    -llog $(OPENGLES_LIB) -ldl
     
 # The list of shared libraries *modules* this module depends on at runtime.
 # This is necessary at link time and to embed the corresponding information
@@ -88,7 +91,7 @@ LOCAL_SHARED_LIBRARIES := QCAR-prebuilt
 # compute dependencies automatically for you; just list the source files
 # that will be passed directly to a compiler, and you should be good.
 
-LOCAL_SRC_FILES := ImageTargets.cpp SampleUtils.cpp Texture.cpp
+LOCAL_SRC_FILES := ImageTargets.cpp SampleUtils.cpp Texture.cpp GrabCut.cpp
 
 # By default, ARM target binaries will be generated in 'thumb' mode, where
 # each instruction are 16-bit wide. You can define this variable to 'arm'

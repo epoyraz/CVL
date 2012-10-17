@@ -16,7 +16,7 @@ import android.util.Log;
 
 public class DebugLog
 {
-    private static final String LOGTAG = "QCAR";
+    private static final String LOGTAG = "S3D";
 
     /** Logging functions to generate ADB logcat messages. */
 
