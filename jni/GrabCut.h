@@ -17,5 +17,7 @@ public:
 	void executeGrabCut(int iterations);
 
 private:
-
+	Mat image, mask;
+	Mat bgdModel, fgdModel;
+	Rect rect;
 };

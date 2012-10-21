@@ -75,8 +75,7 @@ LOCAL_CFLAGS := -Wno-write-strings $(OPENGLES_DEF)
 # module. This is useful to pass the name of specific system libraries
 # with the "-l" prefix.
 
-LOCAL_LDLIBS := \
-    -llog $(OPENGLES_LIB) -ldl
+LOCAL_LDLIBS += -llog $(OPENGLES_LIB) -ldl
     
 # The list of shared libraries *modules* this module depends on at runtime.
 # This is necessary at link time and to embed the corresponding information
