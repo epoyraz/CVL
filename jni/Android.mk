@@ -42,7 +42,7 @@ include ../OpenCV-2.4.2-android-sdk/sdk/native/jni/OpenCV.mk
 # prefix and suffix to the corresponding generated file. In other words,
 # a shared library module named 'foo' will generate 'libfoo.so'.
 
-LOCAL_MODULE := ImageTargets
+LOCAL_MODULE := S3D
 
 # The TARGET_PLATFORM defines the targetted Android Platform API level
 

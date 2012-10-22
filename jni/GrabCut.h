@@ -8,10 +8,11 @@ using namespace std;
 
 class GrabCut {
 public:
+	GrabCut(Mat image);
 	// Adds a list of coordinates to the foreground
-	void addForegroundStroke(int coordinates[][2]);
+	void addForegroundStroke(vector<Point>& fgdPixels);
 	// Adds a list of coordinates to the background
-	void addBackgroundStroke(int coordinates[][2]);
+	void addBackgroundStroke(vector<Point>& bgdPixels);
 
 	// Executes the actual GrabCut
 	void executeGrabCut(int iterations);

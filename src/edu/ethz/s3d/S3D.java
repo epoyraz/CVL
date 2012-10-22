@@ -2,6 +2,10 @@ package edu.ethz.s3d;
 
 import java.util.Vector;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -37,7 +42,7 @@ public class S3D extends Activity
     private static final int APPSTATUS_CAMERA_RUNNING   = 7;
     
     // Name of the native dynamic libraries to load:
-    private static final String NATIVE_LIB_SAMPLE = "ImageTargets";    
+    private static final String NATIVE_LIB_SAMPLE = "S3D";    
     private static final String NATIVE_LIB_QCAR = "QCAR"; 
 
     // Our OpenGL view:
@@ -91,7 +96,6 @@ public class S3D extends Activity
     static
     {
         loadLibrary(NATIVE_LIB_QCAR);
-        loadLibrary(NATIVE_LIB_SAMPLE);
     }
     
     
@@ -262,16 +266,41 @@ public class S3D extends Activity
         // Set the splash screen image to display during initialization:
         //TODO: mSplashScreenImageResource = R.drawable.splash_screen_image_targets;
         
-        // Load any sample specific textures:  
-        mTextures = new Vector<Texture>();
-        loadTextures();
-        
-        // Query the QCAR initialization flags:
-        mQCARFlags = getInitializationFlags();
-        
-        // Update the application status to start initializing application
-        updateApplicationStatus(APPSTATUS_INIT_APP);
+        DebugLog.LOGI("Trying to load OpenCV library");
+        if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_2, this, mOpenCVCallBack))
+        {
+        	DebugLog.LOGE("Cannot connect to OpenCV Manager");
+        }
     }
+
+    private BaseLoaderCallback  mOpenCVCallBack = new BaseLoaderCallback(this) {
+    	@Override
+    	public void onManagerConnected(int status) {
+    		switch (status) {
+				case LoaderCallbackInterface.SUCCESS:
+				{
+					DebugLog.LOGI("OpenCV loaded successfully");
+					
+					// Load native library after(!) OpenCV initialization
+			        loadLibrary(NATIVE_LIB_SAMPLE);
+			        
+			        // Load any sample specific textures:  
+			        mTextures = new Vector<Texture>();
+			        loadTextures();
+			        
+			        // Query the QCAR initialization flags:
+			        mQCARFlags = getInitializationFlags();
+			        
+			        // Update the application status to start initializing application
+			        updateApplicationStatus(APPSTATUS_INIT_APP);
+				} break;
+				default:
+				{
+					super.onManagerConnected(status);
+				} break;
+			}
+    	}
+	};
 
     
     /** We want to load specific textures from the APK, which we will later
