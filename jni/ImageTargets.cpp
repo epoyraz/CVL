@@ -726,6 +726,24 @@ Java_edu_ethz_s3d_S3DRenderer_updateRendering(
 }
 
 
+JNIEXPORT void JNICALL
+Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArray foreground,jfloatArray background) {
+
+  LOG("Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray");
+  jfloat* foregroundjf = env->GetFloatArrayElements(foreground,0);
+  float* valuesforeground = foregroundjf;
+
+  jfloat* backgroundjf = env->GetFloatArrayElements(background,0);
+  float* valuesbackground = backgroundjf;
+
+
+  env->ReleaseFloatArrayElements(foreground,foregroundjf,0);
+  env->ReleaseFloatArrayElements(background,backgroundjf,0);
+
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
