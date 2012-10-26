@@ -6,11 +6,10 @@
 
 package edu.ethz.s3d;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-
-import com.qualcomm.QCAR.QCAR;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -24,18 +23,29 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
+import com.qualcomm.QCAR.QCAR;
 
-/** QCARSampleGLView is a support class for the QCAR samples applications.
+
+/** S3DView is a support class for the QCAR samples applications.
  * 
  *  Responsible for setting up and configuring the OpenGL surface view.
  *  
  * */
 public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
 {
-	private LinkedList<LinkedList<MotionEvent.PointerCoords>> foregroundStrokes;
+	public native void toJNIArray(float[] foreground, float[] background);
+	
+	private LinkedList<LinkedList<MotionEvent.PointerCoords>> fgdStrokes;
+	private LinkedList<LinkedList<MotionEvent.PointerCoords>> bgdStrokes;
+	boolean isForeground = true;
+	boolean hasFgd = false;
+	boolean hasBgd = false;
+	Paint fgdColor = new Paint();
+	Paint bgdColor = new Paint();
 	
     private static boolean mUseOpenGLES2 = true;
 
@@ -44,16 +54,21 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     {
         super(context);
         this.setWillNotDraw(false);
-		DebugLog.LOGD("QCARSampleGLView::construct");
+		DebugLog.LOGD("S3DView::construct");
         setOnTouchListener(this);
-        foregroundStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
+        fgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
+        bgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
+        fgdColor.setColor(Color.BLUE);
+        fgdColor.setStrokeWidth(10);
+        bgdColor.setColor(Color.GREEN);
+        bgdColor.setStrokeWidth(10);
     }
 
     
     /** Initialization. */
     public void init(int flags, boolean translucent, int depth, int stencil)
     {
-        DebugLog.LOGD("QCARSampleGLView::init");
+        DebugLog.LOGD("S3DView::init");
         // By default GLSurfaceView tries to find a surface that is as close
         // as possible to a 16-bit RGB frame buffer with a 16-bit depth buffer.
         // This function can override the default values and set custom values.
@@ -132,7 +147,7 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     /** Checks the OpenGL error. */
     private static void checkEglError(String prompt, EGL10 egl)
     {
-		DebugLog.LOGD("QCARSampleGLView::checkEglError");
+		DebugLog.LOGD("S3DView::checkEglError");
         int error;
         while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS)
         {
@@ -271,40 +286,74 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     }
 
 	public boolean onTouch(View v, MotionEvent event) {
-		DebugLog.LOGD("QCARSampleGLView::onTouch");
+		DebugLog.LOGD("S3DView::onTouch");
+		// Select corresponding list
+		LinkedList<LinkedList<MotionEvent.PointerCoords>> outerList = isForeground ? fgdStrokes : bgdStrokes;
+		hasFgd = isForeground ? true : hasFgd;
+		hasBgd = !isForeground ? true : hasBgd;
+		// Initialize coordinates object
 		MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+		
+		// Switch the different event types
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				// We store the first position of the touch by generating a new list
 				event.getPointerCoords(0, coordinates);
 				LinkedList<MotionEvent.PointerCoords> innerList = new LinkedList<MotionEvent.PointerCoords>();
 				innerList.add(coordinates);
-				foregroundStrokes.add(innerList);
+				outerList.add(innerList);
 				break;
 			case MotionEvent.ACTION_MOVE:
 				// We get the latest position information
 				event.getPointerCoords(0, coordinates);
-				foregroundStrokes.getLast().add(coordinates);
+				outerList.getLast().add(coordinates);
 				
 				// Drawing is done by the onDraw function
 				break;
 			case MotionEvent.ACTION_UP:
 				// We finish the tracking of points and submit the array to native code
+				float[] fgdCoords = convertToArray(fgdStrokes);
+				float[] bgdCoords = convertToArray(bgdStrokes);
+				if (hasFgd && hasBgd) {
+					toJNIArray(fgdCoords, bgdCoords);
+				}
 				break;
+					
 		}
 		invalidate();
 		// We want to get all follow-up events.
 		return true;
 	}
 
-    @Override
+    private float[] convertToArray(
+			LinkedList<LinkedList<PointerCoords>> strokes) {
+    	ArrayList<Float> list = new ArrayList<Float>(); 
+    	Iterator<LinkedList<MotionEvent.PointerCoords>> outerIter = strokes.iterator();
+    	while (outerIter.hasNext()) {
+    		Iterator<MotionEvent.PointerCoords> innerIter = outerIter.next().iterator();
+    		while (innerIter.hasNext()) {
+    			MotionEvent.PointerCoords coord = innerIter.next();
+    			list.add(coord.x);
+    			list.add(coord.y);
+    		}
+    	}
+    	float[] finalArray = new float[list.size()];
+    	Iterator<Float> iter = list.iterator();
+    	int i = 0;
+    	while (iter.hasNext()) {
+    		finalArray[i] = iter.next();
+    		i++;
+    	}
+		return finalArray;
+	}
+
+
+	@Override
     public void onDraw(Canvas canvas) {
-        DebugLog.LOGD("QCARSampleGLView::onDraw");
-    	// Select colors
-    	Paint fgdColor = new Paint();
-    	fgdColor.setColor(Color.BLUE);
+        DebugLog.LOGD("S3DView::onDraw");
     	
-    	Iterator<LinkedList<MotionEvent.PointerCoords>> iter = foregroundStrokes.iterator();
+    	// Draw foreground strokes
+    	Iterator<LinkedList<MotionEvent.PointerCoords>> iter = fgdStrokes.iterator();
     	while (iter.hasNext()) {
     		Iterator<MotionEvent.PointerCoords> innerIter = iter.next().iterator();
     		MotionEvent.PointerCoords lastCoords = innerIter.next();
@@ -312,6 +361,19 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     		while (innerIter.hasNext()) {
     			currCoords = innerIter.next();
     			canvas.drawLine(lastCoords.x, lastCoords.y, currCoords.x, currCoords.y, fgdColor);
+    			lastCoords = currCoords;
+    		}
+    	}
+    	
+    	// Draw background strokes
+    	iter = bgdStrokes.iterator();
+    	while (iter.hasNext()) {
+    		Iterator<MotionEvent.PointerCoords> innerIter = iter.next().iterator();
+    		MotionEvent.PointerCoords lastCoords = innerIter.next();
+    		MotionEvent.PointerCoords currCoords = null;
+    		while (innerIter.hasNext()) {
+    			currCoords = innerIter.next();
+    			canvas.drawLine(lastCoords.x, lastCoords.y, currCoords.x, currCoords.y, bgdColor);
     			lastCoords = currCoords;
     		}
     	}

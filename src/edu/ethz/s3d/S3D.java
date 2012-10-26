@@ -90,6 +90,8 @@ public class S3D extends Activity
     
     // The menu item for swapping data sets:
     MenuItem mDataSetMenuItem = null;
+    // Menu item for toggling fore/background
+    MenuItem mFBgdMenuItem = null;
     boolean mIsStonesAndChipsDataSetActive  = false;
     
     /** Static initializer block to load native libraries on start-up. */
@@ -716,6 +718,8 @@ public class S3D extends Activity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         super.onCreateOptionsMenu(menu);
+        
+        mFBgdMenuItem = menu.add("Toggle Fore/Background Strokes");
                         
         mDataSetMenuItem = menu.add("Switch to Tarmac dataset");
         menu.add("Toggle flash");
@@ -738,6 +742,9 @@ public class S3D extends Activity
     /** Invoked when the user selects an item from the Menu */
     public boolean onOptionsItemSelected(MenuItem item)
     {
+    	if(item == mFBgdMenuItem) {
+    		mGlView.isForeground = !mGlView.isForeground;
+    	}
         if(item == mDataSetMenuItem)
         {
            switchDatasetAsap();
