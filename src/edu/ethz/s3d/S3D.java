@@ -276,6 +276,7 @@ public class S3D extends Activity
     private BaseLoaderCallback  mOpenCVCallBack = new BaseLoaderCallback(this) {
     	@Override
     	public void onManagerConnected(int status) {
+            DebugLog.LOGD("ImageTargets::BaseLoaderCallback::onManagerConnected");
     		switch (status) {
 				case LoaderCallbackInterface.SUCCESS:
 				{
@@ -307,6 +308,7 @@ public class S3D extends Activity
     use for rendering. */
     private void loadTextures()
     {
+        DebugLog.LOGD("ImageTargets::loadTextures");
         mTextures.add(Texture.loadTextureFromApk("TextureTeapotBrass.png",
                                                  getAssets()));
         mTextures.add(Texture.loadTextureFromApk("TextureTeapotBlue.png",
@@ -319,6 +321,7 @@ public class S3D extends Activity
     /** Configure QCAR with the desired version of OpenGL ES. */
     private int getInitializationFlags()
     {
+        DebugLog.LOGD("ImageTargets::getInitializationFlags");
         int flags = 0;
         
         // Query the native code:
@@ -487,6 +490,7 @@ public class S3D extends Activity
      * access by ImageTargets::onResume() and InitQCARTask::onPostExecute(). */
     private synchronized void updateApplicationStatus(int appStatus)
     {
+        DebugLog.LOGD("ImageTargets::updateApplicationStatus");
         // Exit if there is no change in status
         if (mAppStatus == appStatus)
             return;
@@ -598,6 +602,7 @@ public class S3D extends Activity
                             addContentView(mGlView, new LayoutParams(
                                             LayoutParams.FILL_PARENT,
                                             LayoutParams.FILL_PARENT));
+                            //addContentView(mGrabView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
                             
                             // Start the camera:
                             updateApplicationStatus(APPSTATUS_CAMERA_RUNNING);

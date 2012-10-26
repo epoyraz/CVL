@@ -6,6 +6,10 @@
 
 package edu.ethz.s3d;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import com.qualcomm.QCAR.QCAR;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -14,8 +18,14 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
 
 /** QCARSampleGLView is a support class for the QCAR samples applications.
@@ -23,20 +33,27 @@ import android.opengl.GLSurfaceView;
  *  Responsible for setting up and configuring the OpenGL surface view.
  *  
  * */
-public class QCARSampleGLView extends GLSurfaceView
+public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
 {
+	private LinkedList<LinkedList<MotionEvent.PointerCoords>> foregroundStrokes;
+	
     private static boolean mUseOpenGLES2 = true;
 
     /** Constructor. */
     public QCARSampleGLView(Context context)
     {
         super(context);
+        this.setWillNotDraw(false);
+		DebugLog.LOGD("QCARSampleGLView::construct");
+        setOnTouchListener(this);
+        foregroundStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
     }
 
     
     /** Initialization. */
     public void init(int flags, boolean translucent, int depth, int stencil)
     {
+        DebugLog.LOGD("QCARSampleGLView::init");
         // By default GLSurfaceView tries to find a surface that is as close
         // as possible to a 16-bit RGB frame buffer with a 16-bit depth buffer.
         // This function can override the default values and set custom values.
@@ -115,6 +132,7 @@ public class QCARSampleGLView extends GLSurfaceView
     /** Checks the OpenGL error. */
     private static void checkEglError(String prompt, EGL10 egl)
     {
+		DebugLog.LOGD("QCARSampleGLView::checkEglError");
         int error;
         while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS)
         {
@@ -250,5 +268,52 @@ public class QCARSampleGLView extends GLSurfaceView
         protected int mDepthSize;
         protected int mStencilSize;
         private int[] mValue = new int[1];
+    }
+
+	public boolean onTouch(View v, MotionEvent event) {
+		DebugLog.LOGD("QCARSampleGLView::onTouch");
+		MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+		switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				// We store the first position of the touch by generating a new list
+				event.getPointerCoords(0, coordinates);
+				LinkedList<MotionEvent.PointerCoords> innerList = new LinkedList<MotionEvent.PointerCoords>();
+				innerList.add(coordinates);
+				foregroundStrokes.add(innerList);
+				break;
+			case MotionEvent.ACTION_MOVE:
+				// We get the latest position information
+				event.getPointerCoords(0, coordinates);
+				foregroundStrokes.getLast().add(coordinates);
+				
+				// Drawing is done by the onDraw function
+				break;
+			case MotionEvent.ACTION_UP:
+				// We finish the tracking of points and submit the array to native code
+				break;
+		}
+		invalidate();
+		// We want to get all follow-up events.
+		return true;
+	}
+
+    @Override
+    public void onDraw(Canvas canvas) {
+        DebugLog.LOGD("QCARSampleGLView::onDraw");
+    	// Select colors
+    	Paint fgdColor = new Paint();
+    	fgdColor.setColor(Color.BLUE);
+    	
+    	Iterator<LinkedList<MotionEvent.PointerCoords>> iter = foregroundStrokes.iterator();
+    	while (iter.hasNext()) {
+    		Iterator<MotionEvent.PointerCoords> innerIter = iter.next().iterator();
+    		MotionEvent.PointerCoords lastCoords = innerIter.next();
+    		MotionEvent.PointerCoords currCoords = null;
+    		while (innerIter.hasNext()) {
+    			currCoords = innerIter.next();
+    			canvas.drawLine(lastCoords.x, lastCoords.y, currCoords.x, currCoords.y, fgdColor);
+    			lastCoords = currCoords;
+    		}
+    	}
     }
 }
