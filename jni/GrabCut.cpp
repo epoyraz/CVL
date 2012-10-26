@@ -1,8 +1,13 @@
 #include "GrabCut.h"
 
-GrabCut::GrabCut(Mat image_in) : image(image_in) {
-	mask.create(image.rows, image.cols, CV_8UC1);
+GrabCut::GrabCut(Mat image) : imageForSize(image) {
+	mask.create(imageForSize.rows, imageForSize.cols, CV_8UC1);
 
+}
+
+void GrabCut::unsetModels() {
+	bgdModel.release();
+	fgdModel.release();
 }
 
 void GrabCut::addForegroundStroke(vector<Point>& fgdPixels) {
@@ -10,9 +15,7 @@ void GrabCut::addForegroundStroke(vector<Point>& fgdPixels) {
 		mask.at<uchar>(*it) = GC_FGD;
 	}
 
-	bgdModel.release();
-	fgdModel.release();
-	grabCut( image, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
+	grabCut( imageForSize, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
 }
 
 void GrabCut::addBackgroundStroke(vector<Point>& bgdPixels) {
@@ -20,11 +23,14 @@ void GrabCut::addBackgroundStroke(vector<Point>& bgdPixels) {
 		mask.at<uchar>(*it) = GC_BGD;
 	}
 
-	bgdModel.release();
-	fgdModel.release();
-	grabCut( image, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
+	grabCut( imageForSize, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
 }
 
-void GrabCut::executeGrabCut(int iterations) {
+void GrabCut::executeGrabCut(Mat& image, int iterations) {
+	imageForSize = image;
 	grabCut( image, mask, rect, bgdModel, fgdModel, 1, GC_EVAL);
+}
+
+Mat GrabCut::getMaskedImage() {
+	return imageForSize.mul(mask);
 }

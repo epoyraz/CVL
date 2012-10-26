@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <algorithm>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -15,10 +16,14 @@ public:
 	void addBackgroundStroke(vector<Point>& bgdPixels);
 
 	// Executes the actual GrabCut
-	void executeGrabCut(int iterations);
+	void executeGrabCut(Mat& image, int iterations);
+	// Returns the image masked
+	Mat getMaskedImage();
+	// Unsets the models to split the image
+	void unsetModels();
 
 private:
-	Mat image, mask;
+	Mat imageForSize, mask;
 	Mat bgdModel, fgdModel;
 	Rect rect;
 };
