@@ -39,6 +39,8 @@
 #include <QCAR/UpdateCallback.h>
 #include <QCAR/DataSet.h>
 
+#include "GrabCut.h"
+
 #include "SampleUtils.h"
 #include "Texture.h"
 #include "CubeShaders.h"
@@ -54,6 +56,10 @@ int textureCount                = 0;
 Texture** textures              = 0;
 
 // OpenGL ES 2.0 specific:
+// TODO: Remove this as soon as we are finished. Otherwise I always get errors
+#ifndef USE_OPENGL_ES_2_0
+#define USE_OPENGL_ES_2_0
+#endif
 #ifdef USE_OPENGL_ES_2_0
 unsigned int shaderProgramID    = 0;
 GLint vertexHandle              = 0;
@@ -116,6 +122,7 @@ class ImageTargets_UpdateCallback : public QCAR::UpdateCallback
 
 ImageTargets_UpdateCallback updateCallback;
 
+// Just returns 1 for OpenGLEs 1.1 and 2 for other
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_getOpenGlEsVersionNative(JNIEnv *, jobject)
 {
@@ -127,21 +134,21 @@ Java_edu_ethz_s3d_S3D_getOpenGlEsVersionNative(JNIEnv *, jobject)
 }
 
 
+// Sets isActivityInPortraitMode to the argument value
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_setActivityPortraitMode(JNIEnv *, jobject, jboolean isPortrait)
 {
     isActivityInPortraitMode = isPortrait;
 }
 
-
-
+// Sets the boolean to switch the dataset
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_switchDatasetAsap(JNIEnv *, jobject)
 {
     switchDataSetAsap = true;
 }
 
-
+// Tries to initialize the Image tracker (returns 1 on success, 0 on fail)
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_initTracker(JNIEnv *, jobject)
 {
@@ -160,7 +167,7 @@ Java_edu_ethz_s3d_S3D_initTracker(JNIEnv *, jobject)
     return 1;
 }
 
-
+// Deinits the tracker
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_deinitTracker(JNIEnv *, jobject)
 {
@@ -171,7 +178,7 @@ Java_edu_ethz_s3d_S3D_deinitTracker(JNIEnv *, jobject)
     trackerManager.deinitTracker(QCAR::Tracker::IMAGE_TRACKER);
 }
 
-
+// Tries to load the tracker image data and activates the StonesAndChips dataset (returns 1 on success, 0 on fail)
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_loadTrackerData(JNIEnv *, jobject)
 {
@@ -227,7 +234,7 @@ Java_edu_ethz_s3d_S3D_loadTrackerData(JNIEnv *, jobject)
     return 1;
 }
 
-
+// Tries to deactivate and destroy the datasets (returns 1 on success, 0 on fail)
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_destroyTrackerData(JNIEnv *, jobject)
 {
@@ -287,7 +294,7 @@ Java_edu_ethz_s3d_S3D_destroyTrackerData(JNIEnv *, jobject)
     return 1;
 }
 
-
+// Registers callback for dataset swap and could set hints for 2 targets
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_onQCARInitializedNative(JNIEnv *, jobject)
 {
@@ -300,7 +307,8 @@ Java_edu_ethz_s3d_S3D_onQCARInitializedNative(JNIEnv *, jobject)
     // QCAR::setHint(QCAR::HINT_IMAGE_TARGET_MULTI_FRAME_ENABLED, 1);
 }
 
-
+// Initializes the renderer to render the teapot
+// Here I deactivated the background rendering
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 {
@@ -313,7 +321,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     QCAR::State state = QCAR::Renderer::getInstance().begin();
     
     // Explicitly render the Video Background
-    QCAR::Renderer::getInstance().drawVideoBackground();
+    //QCAR::Renderer::getInstance().drawVideoBackground();
        
 #ifdef USE_OPENGL_ES_1_1
     // Set GL11 flags:
@@ -436,7 +444,7 @@ configureVideoBackground()
 
 
     // Configure the video background
-    QCAR::VideoBackgroundConfig config;
+    /*QCAR::VideoBackgroundConfig config;
     config.mEnabled = true;
     config.mSynchronous = true;
     config.mPosition.data[0] = 0.0f;
@@ -476,10 +484,10 @@ configureVideoBackground()
     LOG("Configure Video Background : Video (%d,%d), Screen (%d,%d), mSize (%d,%d)", videoMode.mWidth, videoMode.mHeight, screenWidth, screenHeight, config.mSize.data[0], config.mSize.data[1]);
 
     // Set the config:
-    QCAR::Renderer::getInstance().setVideoBackgroundConfig(config);
+    QCAR::Renderer::getInstance().setVideoBackgroundConfig(config);*/
 }
 
-
+// Sets screen dimensions, gets the texture count, loads and stores them
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_initApplicationNative(
                             JNIEnv* env, jobject obj, jint width, jint height)
@@ -535,7 +543,7 @@ Java_edu_ethz_s3d_S3D_initApplicationNative(
     LOG("Java_edu_ethz_s3d_S3D_initApplicationNative finished");
 }
 
-
+// Deletes the textures
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_deinitApplicationNative(
                                                         JNIEnv* env, jobject obj)
@@ -558,7 +566,8 @@ Java_edu_ethz_s3d_S3D_deinitApplicationNative(
     }
 }
 
-
+//Starts the camera module and starts the imageTracker
+// Dependency: Calls configureVideoBackground
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_startCamera(JNIEnv *,
                                                                          jobject)
@@ -597,7 +606,7 @@ Java_edu_ethz_s3d_S3D_startCamera(JNIEnv *,
         imageTracker->start();
 }
 
-
+// Stops the tracker and the camera which it also deinits
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_stopCamera(JNIEnv *, jobject)
 {
@@ -613,7 +622,7 @@ Java_edu_ethz_s3d_S3D_stopCamera(JNIEnv *, jobject)
     QCAR::CameraDevice::getInstance().deinit();
 }
 
-
+// Gets the camera calibration and sets it as projection matrix
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_setProjectionMatrix(JNIEnv *, jobject)
 {
@@ -672,9 +681,9 @@ Java_edu_ethz_s3d_S3D_setFocusMode(JNIEnv*, jobject, jint mode)
 }
 
 
+// This attaches the textures to OpenGL
 JNIEXPORT void JNICALL
-Java_edu_ethz_s3d_S3DRenderer_initRendering(
-                                                    JNIEnv* env, jobject obj)
+Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
 {
     LOG("Java_edu_ethz_s3d_S3DRenderer_initRendering");
 
@@ -710,7 +719,8 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(
 
 }
 
-
+//sets the screen size
+// Dependency: calls configureVideoBackground
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3DRenderer_updateRendering(
                         JNIEnv* env, jobject obj, jint width, jint height)
@@ -725,7 +735,7 @@ Java_edu_ethz_s3d_S3DRenderer_updateRendering(
     configureVideoBackground();
 }
 
-
+// Bridges over the fore-/background information from java
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArray foreground,jfloatArray background) {
 
@@ -736,13 +746,13 @@ Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArr
   jfloat* backgroundjf = env->GetFloatArrayElements(background,0);
   float* valuesbackground = backgroundjf;
 
+  GrabCut* a = new GrabCut();
+
 
   env->ReleaseFloatArrayElements(foreground,foregroundjf,0);
   env->ReleaseFloatArrayElements(background,backgroundjf,0);
 
 }
-
-
 
 #ifdef __cplusplus
 }

@@ -45,7 +45,7 @@ public class S3DRenderer implements GLSurfaceView.Renderer
         
         // Call QCAR function to (re)initialize rendering after first use
         // or after OpenGL ES context was lost (e.g. after onPause/onResume):
-        QCAR.onSurfaceCreated();
+        //TODO: Why wasn't this necessairy: QCAR.onSurfaceCreated();
     }
     
     
