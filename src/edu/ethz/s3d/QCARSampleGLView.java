@@ -41,11 +41,11 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
 	
 	private LinkedList<LinkedList<MotionEvent.PointerCoords>> fgdStrokes;
 	private LinkedList<LinkedList<MotionEvent.PointerCoords>> bgdStrokes;
-	boolean isForeground = true;
-	boolean hasFgd = false;
-	boolean hasBgd = false;
-	Paint fgdColor = new Paint();
-	Paint bgdColor = new Paint();
+	public boolean isForeground = true;
+	private boolean hasFgd = false;
+	private boolean hasBgd = false;
+	private Paint fgdColor = new Paint();
+	private Paint bgdColor = new Paint();
 	
     private static boolean mUseOpenGLES2 = true;
 
