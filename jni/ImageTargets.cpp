@@ -54,6 +54,8 @@ extern "C"
 // Textures:
 int textureCount                = 0;
 Texture** textures              = 0;
+GrabCut* grabCutObject;
+unsigned int backgroundTexture  = 0;
 
 // OpenGL ES 2.0 specific:
 // TODO: Remove this as soon as we are finished. Otherwise I always get errors
@@ -312,14 +314,31 @@ Java_edu_ethz_s3d_S3D_onQCARInitializedNative(JNIEnv *, jobject)
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 {
-    //LOG("Java_edu_ethz_S3D_GLRenderer_renderFrame");
+
+    // Would be too verbose: LOG("Java_edu_ethz_S3D_GLRenderer_renderFrame");
 
     // Clear color and depth buffer 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Get the state from QCAR and mark the beginning of a rendering section
     QCAR::State state = QCAR::Renderer::getInstance().begin();
-    
+
+	// Fill and bind background image
+	LOG("Binding background texture");
+	Mat frameData = grabCutObject->getFrame()*-1;
+	if (frameData.rows > 0)
+		LOG("value: %d", frameData.at<int>(1,1));
+	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, grabCutObject->getWidth(),
+    	grabCutObject->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+        (GLvoid*)  frameData.data);
+
+
+    QCAR::Renderer::getInstance().bindVideoBackground(0);
+    QCAR::Renderer::getInstance().setVideoBackgroundTextureID(backgroundTexture);
+    //QCAR::Renderer::getInstance().drawVideoBackground();
+	LOG("Bound background texture");
+
     // Explicitly render the Video Background
     //QCAR::Renderer::getInstance().drawVideoBackground();
        
@@ -437,6 +456,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 void
 configureVideoBackground()
 {
+	QCAR::setFrameFormat(QCAR::RGB888, true);
     // Get the default video mode:
     QCAR::CameraDevice& cameraDevice = QCAR::CameraDevice::getInstance();
     QCAR::VideoMode videoMode = cameraDevice.
@@ -444,7 +464,7 @@ configureVideoBackground()
 
 
     // Configure the video background
-    /*QCAR::VideoBackgroundConfig config;
+    QCAR::VideoBackgroundConfig config;
     config.mEnabled = true;
     config.mSynchronous = true;
     config.mPosition.data[0] = 0.0f;
@@ -484,7 +504,7 @@ configureVideoBackground()
     LOG("Configure Video Background : Video (%d,%d), Screen (%d,%d), mSize (%d,%d)", videoMode.mWidth, videoMode.mHeight, screenWidth, screenHeight, config.mSize.data[0], config.mSize.data[1]);
 
     // Set the config:
-    QCAR::Renderer::getInstance().setVideoBackgroundConfig(config);*/
+    QCAR::Renderer::getInstance().setVideoBackgroundConfig(config);
 }
 
 // Sets screen dimensions, gets the texture count, loads and stores them
@@ -687,6 +707,11 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
 {
     LOG("Java_edu_ethz_s3d_S3DRenderer_initRendering");
 
+    grabCutObject = new GrabCut();
+
+    glGenTextures(1, &(backgroundTexture));
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+
     // Define clear color
     glClearColor(0.0f, 0.0f, 0.0f, QCAR::requiresAlpha() ? 0.0f : 1.0f);
     
@@ -745,9 +770,6 @@ Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArr
 
   jfloat* backgroundjf = env->GetFloatArrayElements(background,0);
   float* valuesbackground = backgroundjf;
-
-  GrabCut* a = new GrabCut();
-
 
   env->ReleaseFloatArrayElements(foreground,foregroundjf,0);
   env->ReleaseFloatArrayElements(background,backgroundjf,0);
