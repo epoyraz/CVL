@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
@@ -264,6 +265,8 @@ public class S3D extends Activity
     {
         DebugLog.LOGD("ImageTargets::onCreate");
         super.onCreate(savedInstanceState);
+        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         // Set the splash screen image to display during initialization:
         //TODO: mSplashScreenImageResource = R.drawable.splash_screen_image_targets;
