@@ -38,9 +38,7 @@
 #include <QCAR/CameraCalibration.h>
 #include <QCAR/UpdateCallback.h>
 #include <QCAR/DataSet.h>
-
 #include "GrabCut.h"
-
 #include "SampleUtils.h"
 #include "Texture.h"
 #include "CubeShaders.h"
@@ -762,12 +760,30 @@ Java_edu_ethz_s3d_S3DRenderer_updateRendering(
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArray foreground,jfloatArray background) {
 
+  grabCutObject = new GrabCut();
+
   LOG("Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray");
   jfloat* foregroundjf = env->GetFloatArrayElements(foreground,0);
   float* valuesforeground = foregroundjf;
 
   jfloat* backgroundjf = env->GetFloatArrayElements(background,0);
   float* valuesbackground = backgroundjf;
+
+  vector<Point> fgdPixels;
+  vector<Point> bgdPixels;
+
+  for (int i=0; i <= sizeof(valuesforeground); i+2) {
+	   fgdPixels.push_back(Point(valuesforeground[i],valuesforeground[i+1]));
+  }
+
+  for (int i=0; i <= sizeof(valuesbackground); i+2) {
+	   bgdPixels.push_back(Point(valuesbackground[i],valuesbackground[i+1]));
+  }
+
+  grabCutObject->addForegroundStroke(fgdPixels);
+  grabCutObject->addBackgroundStroke(bgdPixels);
+
+
 
   env->ReleaseFloatArrayElements(foreground,foregroundjf,0);
   env->ReleaseFloatArrayElements(background,backgroundjf,0);
