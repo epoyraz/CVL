@@ -1,7 +1,7 @@
 #include "GrabCut.h"
 
 GrabCut::GrabCut() {
-	imageForSize = getFrame();
+	//imageForSize = getFrame();
 	mask.create(imageForSize.rows, imageForSize.cols, CV_8UC1);
 
 }
@@ -37,7 +37,6 @@ Mat GrabCut::getMaskedImage() {
 }
 
 Mat GrabCut::getFrame() {
-	//LOG("GrabCut::getFrame");
 	QCAR::State state = QCAR::Renderer::getInstance().begin();
 
 	QCAR::Frame frame = state.getFrame();
@@ -46,11 +45,11 @@ Mat GrabCut::getFrame() {
 	    const QCAR::Image *qcarImage = frame.getImage(i);
 	    if (qcarImage->getFormat() == QCAR::RGB888)
 	    {
-	    	LOG("returning GrabCut::getFrame");
-	        return Mat(qcarImage->getHeight(), qcarImage->getWidth(), CV_8UC3, (unsigned char *) const_cast<void*>(qcarImage->getPixels()));
+	    	// Create the array with all the sizes
+	    	int sizes[3]; sizes[0] = qcarImage->getHeight(); sizes[1] = qcarImage->getWidth(); sizes[2] = 3;
+	        return Mat(3, sizes, 8, (unsigned char *) const_cast<void*>(qcarImage->getPixels()));
 	    }
 	}
-	LOG("returning empty GrabCut::getFrame");
 	return Mat();
 }
 

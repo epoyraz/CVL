@@ -324,20 +324,18 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     QCAR::State state = QCAR::Renderer::getInstance().begin();
 
 	// Fill and bind background image
-	LOG("Binding background texture");
-	Mat frameData = grabCutObject->getFrame()*-1;
-	if (frameData.rows > 0)
-		LOG("value: %d", frameData.at<int>(1,1));
-	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, grabCutObject->getWidth(),
-    	grabCutObject->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-        (GLvoid*)  frameData.data);
-
-
-    QCAR::Renderer::getInstance().bindVideoBackground(0);
-    QCAR::Renderer::getInstance().setVideoBackgroundTextureID(backgroundTexture);
-    //QCAR::Renderer::getInstance().drawVideoBackground();
-	LOG("Bound background texture");
+	Mat frameData = grabCutObject->getFrame();
+	if (!frameData.empty()) {
+		LOG("value: %d : %d : %d ", frameData.at<char>(200,200,0), frameData.at<char>(200,200,1), frameData.at<char>(200,200,2));
+		for (int i = 0; i < 50; i++) {
+			for (int j = 0; j < 50; j++) {
+				frameData.at<char>(150+i,150+j,0) = 0;
+				frameData.at<char>(150+i,150+j,1) = 0;
+				frameData.at<char>(150+i,150+j,2) = 0;
+			}
+		}
+	}
+    QCAR::Renderer::getInstance().drawVideoBackground();
 
     // Explicitly render the Video Background
     //QCAR::Renderer::getInstance().drawVideoBackground();
