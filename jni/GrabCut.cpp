@@ -35,9 +35,15 @@ void GrabCut::executeGrabCut(int iterations) {
 	LOG("Executing GrabCut");
 	grabCut(frame, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
 	LOG("Initialized GrabCut");
-	grabCut(frame, mask, rect, bgdModel, fgdModel, 1, GC_EVAL);
+	grabCut(frame, mask, rect, bgdModel, fgdModel, 1);
 	LOG("Executed GrabCut");
-	lastMasked = frame.mul(mask);
+	for (int i = 0; i < frame.rows; i++) {
+		for (int j = 0; j < frame.cols; j++) {
+			for (int d = 0; d < 3; d++) {
+				lastMasked.data[i*3*frame.cols+j*3+d] = frame.data[i*3*frame.cols+j*3+d] * mask.data[i*frame.cols+j];
+			}
+		}
+	}
 	LOG("Created Frame");
 }
 
