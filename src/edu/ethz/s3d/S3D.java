@@ -5,6 +5,7 @@ import java.util.Vector;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -48,6 +49,7 @@ public class S3D extends Activity
 
     // Our OpenGL view:
     private QCARSampleGLView mGlView;
+    private GrabCutView mGrabView;
     
     // The view to display the sample splash screen:
     private ImageView mSplashScreenView;
@@ -101,7 +103,18 @@ public class S3D extends Activity
         loadLibrary(NATIVE_LIB_QCAR);
     }
     
+    public void startGrabCutView() {
+    	mGrabView = new GrabCutView(this);
+    	setContentView(mGrabView);
+    	mGlView.onPause();
+    }
     
+    public void finishedGrabCut() {
+    	mGlView.onResume();
+    	setContentView(mGlView);
+    	mGrabView = null;
+    }
+        
     /** An async task to initialize QCAR asynchronously. */
     private class InitQCARTask extends AsyncTask<Void, Integer, Boolean>
     {   
@@ -746,7 +759,7 @@ public class S3D extends Activity
     public boolean onOptionsItemSelected(MenuItem item)
     {
     	if(item == mFBgdMenuItem) {
-    		mGlView.isForeground = !mGlView.isForeground;
+    		mGrabView.isForeground = !mGrabView.isForeground;
     	}
         if(item == mDataSetMenuItem)
         {

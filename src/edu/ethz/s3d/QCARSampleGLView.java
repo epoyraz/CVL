@@ -16,6 +16,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
+import org.opencv.core.Mat;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -37,31 +39,17 @@ import com.qualcomm.QCAR.QCAR;
  * */
 public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
 {
-	public native void toJNIArray(float[] foreground, float[] background);
-	
-	private LinkedList<LinkedList<MotionEvent.PointerCoords>> fgdStrokes;
-	private LinkedList<LinkedList<MotionEvent.PointerCoords>> bgdStrokes;
-	public boolean isForeground = true;
-	private boolean hasFgd = false;
-	private boolean hasBgd = false;
-	private Paint fgdColor = new Paint();
-	private Paint bgdColor = new Paint();
+	protected S3D mActivity;
 	
     private static boolean mUseOpenGLES2 = true;
 
     /** Constructor. */
-    public QCARSampleGLView(Context context)
+    public QCARSampleGLView(S3D context)
     {
         super(context);
-        this.setWillNotDraw(false);
 		DebugLog.LOGD("S3DView::construct");
+        mActivity = context;
         setOnTouchListener(this);
-        fgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
-        bgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
-        fgdColor.setColor(Color.BLUE);
-        fgdColor.setStrokeWidth(10);
-        bgdColor.setColor(Color.GREEN);
-        bgdColor.setStrokeWidth(10);
     }
 
     
@@ -284,98 +272,11 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
         protected int mStencilSize;
         private int[] mValue = new int[1];
     }
+    
+    protected native Mat getFrame();
 
-	public boolean onTouch(View v, MotionEvent event) {
-		DebugLog.LOGD("S3DView::onTouch");
-		// Select corresponding list
-		LinkedList<LinkedList<MotionEvent.PointerCoords>> outerList = isForeground ? fgdStrokes : bgdStrokes;
-		hasFgd = isForeground ? true : hasFgd;
-		hasBgd = !isForeground ? true : hasBgd;
-		// Initialize coordinates object
-		MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
-		
-		// Switch the different event types
-		switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				// We store the first position of the touch by generating a new list
-				event.getPointerCoords(0, coordinates);
-				LinkedList<MotionEvent.PointerCoords> innerList = new LinkedList<MotionEvent.PointerCoords>();
-				innerList.add(coordinates);
-				outerList.add(innerList);
-				break;
-			case MotionEvent.ACTION_MOVE:
-				// We get the latest position information
-				event.getPointerCoords(0, coordinates);
-				outerList.getLast().add(coordinates);
-				
-				// Drawing is done by the onDraw function
-				break;
-			case MotionEvent.ACTION_UP:
-				// We finish the tracking of points and submit the array to native code
-				float[] fgdCoords = convertToArray(fgdStrokes);
-				float[] bgdCoords = convertToArray(bgdStrokes);
-				if (hasFgd && hasBgd) {
-					toJNIArray(fgdCoords, bgdCoords);
-				}
-				break;
-					
-		}
-		invalidate();
-		// We want to get all follow-up events.
-		return true;
-	}
-
-    private float[] convertToArray(
-			LinkedList<LinkedList<PointerCoords>> strokes) {
-    	ArrayList<Float> list = new ArrayList<Float>(); 
-    	Iterator<LinkedList<MotionEvent.PointerCoords>> outerIter = strokes.iterator();
-    	while (outerIter.hasNext()) {
-    		Iterator<MotionEvent.PointerCoords> innerIter = outerIter.next().iterator();
-    		while (innerIter.hasNext()) {
-    			MotionEvent.PointerCoords coord = innerIter.next();
-    			list.add(coord.x);
-    			list.add(coord.y);
-    		}
-    	}
-    	float[] finalArray = new float[list.size()];
-    	Iterator<Float> iter = list.iterator();
-    	int i = 0;
-    	while (iter.hasNext()) {
-    		finalArray[i] = iter.next();
-    		i++;
-    	}
-		return finalArray;
-	}
-
-
-	@Override
-    public void onDraw(Canvas canvas) {
-        DebugLog.LOGD("S3DView::onDraw");
-    	
-    	// Draw foreground strokes
-    	Iterator<LinkedList<MotionEvent.PointerCoords>> iter = fgdStrokes.iterator();
-    	while (iter.hasNext()) {
-    		Iterator<MotionEvent.PointerCoords> innerIter = iter.next().iterator();
-    		MotionEvent.PointerCoords lastCoords = innerIter.next();
-    		MotionEvent.PointerCoords currCoords = null;
-    		while (innerIter.hasNext()) {
-    			currCoords = innerIter.next();
-    			canvas.drawLine(lastCoords.x, lastCoords.y, currCoords.x, currCoords.y, fgdColor);
-    			lastCoords = currCoords;
-    		}
-    	}
-    	
-    	// Draw background strokes
-    	iter = bgdStrokes.iterator();
-    	while (iter.hasNext()) {
-    		Iterator<MotionEvent.PointerCoords> innerIter = iter.next().iterator();
-    		MotionEvent.PointerCoords lastCoords = innerIter.next();
-    		MotionEvent.PointerCoords currCoords = null;
-    		while (innerIter.hasNext()) {
-    			currCoords = innerIter.next();
-    			canvas.drawLine(lastCoords.x, lastCoords.y, currCoords.x, currCoords.y, bgdColor);
-    			lastCoords = currCoords;
-    		}
-    	}
+    public boolean onTouch(View v, MotionEvent event) {
+    	mActivity.startGrabCutView();
+    	return false;
     }
 }

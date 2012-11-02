@@ -23,26 +23,29 @@ using namespace std;
 class GrabCut {
 public:
 	GrabCut();
+	~GrabCut();
 	// Adds a list of coordinates to the foreground
 	void addForegroundStroke(vector<Point>& fgdPixels);
 	// Adds a list of coordinates to the background
 	void addBackgroundStroke(vector<Point>& bgdPixels);
 
 	// Executes the actual GrabCut
-	void executeGrabCut(Mat& image, int iterations);
+	void executeGrabCut(int iterations);
 	// Returns the image masked
-	Mat getMaskedImage();
+	Mat* getMaskedImage();
 	// Unsets the models to split the image
 	void unsetModels();
+	// Grab Frame
+	void grabFrame();
 
 	// Returns the height of the image
 	int getHeight();
 	// Returns the width of the image
 	int getWidth();
-	Mat getFrame();
 
 private:
-	Mat imageForSize, mask;
+	Mat getFrame();
+	Mat frame, mask, lastMasked;
 	Mat bgdModel, fgdModel;
 	Rect rect;
 };

@@ -19,6 +19,7 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_s3d=0x7f030000;
+        public static final int main=0x7f030001;
     }
     public static final class menu {
         public static final int activity_s3d=0x7f060000;

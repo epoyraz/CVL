@@ -321,22 +321,8 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     // Get the state from QCAR and mark the beginning of a rendering section
     QCAR::State state = QCAR::Renderer::getInstance().begin();
 
-	// Fill and bind background image
-	Mat frameData = grabCutObject->getFrame();
-	if (!frameData.empty()) {
-		LOG("value: %d : %d : %d ", frameData.at<char>(200,200,0), frameData.at<char>(200,200,1), frameData.at<char>(200,200,2));
-		for (int i = 0; i < 50; i++) {
-			for (int j = 0; j < 50; j++) {
-				frameData.at<char>(150+i,150+j,0) = 0;
-				frameData.at<char>(150+i,150+j,1) = 0;
-				frameData.at<char>(150+i,150+j,2) = 0;
-			}
-		}
-	}
-    QCAR::Renderer::getInstance().drawVideoBackground();
-
     // Explicitly render the Video Background
-    //QCAR::Renderer::getInstance().drawVideoBackground();
+    QCAR::Renderer::getInstance().drawVideoBackground();
        
 #ifdef USE_OPENGL_ES_1_1
     // Set GL11 flags:
@@ -758,38 +744,65 @@ Java_edu_ethz_s3d_S3DRenderer_updateRendering(
 
 // Bridges over the fore-/background information from java
 JNIEXPORT void JNICALL
-Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray(JNIEnv* env,jobject thiz,jfloatArray foreground,jfloatArray background) {
+Java_edu_ethz_s3d_GrabCutView_executeGrabCut(JNIEnv* env,jobject thiz,jfloatArray foreground,jfloatArray background, jint lFgd, jint lBgd) {
 
-  grabCutObject = new GrabCut();
+  LOG("Java_edu_ethz_s3d_GrabCutView_executeGrabCut");
+  float* fgdPos = env->GetFloatArrayElements(foreground,0);
+  LOG("Received foreground.");
 
-  LOG("Java_edu_ethz_s3d_QCARSampleGLView_toJNIArray");
-  jfloat* foregroundjf = env->GetFloatArrayElements(foreground,0);
-  float* valuesforeground = foregroundjf;
-
-  jfloat* backgroundjf = env->GetFloatArrayElements(background,0);
-  float* valuesbackground = backgroundjf;
+  float* bgdPos = env->GetFloatArrayElements(background,0);
+  LOG("Received background.");
 
   vector<Point> fgdPixels;
   vector<Point> bgdPixels;
 
-  for (int i=0; i <= sizeof(valuesforeground); i+2) {
-	   fgdPixels.push_back(Point(valuesforeground[i],valuesforeground[i+1]));
+  LOG("Startet conversion of foreground.");
+  for (int i=0; i < lFgd; i++) {
+	  LOG("Iteration: %d ", i);
+	  fgdPixels.push_back(Point(fgdPos[2*i], fgdPos[2*i+1]));
   }
+  LOG("Finished conversion of foreground.");
 
-  for (int i=0; i <= sizeof(valuesbackground); i+2) {
-	   bgdPixels.push_back(Point(valuesbackground[i],valuesbackground[i+1]));
+  LOG("Startet conversion of background.");
+  for (int i=0; i < lBgd; i++) {
+	  LOG("Iteration: %d ", i);
+	  bgdPixels.push_back(Point(bgdPos[2*i], bgdPos[2*i+1]));
   }
+  LOG("Finished conversion of background.");
 
   grabCutObject->addForegroundStroke(fgdPixels);
   grabCutObject->addBackgroundStroke(bgdPixels);
 
+  grabCutObject->executeGrabCut(1);
 
-
-  env->ReleaseFloatArrayElements(foreground,foregroundjf,0);
-  env->ReleaseFloatArrayElements(background,backgroundjf,0);
-
+  env->ReleaseFloatArrayElements(foreground, fgdPos,0);
+  env->ReleaseFloatArrayElements(background, bgdPos,0);
 }
 
 #ifdef __cplusplus
 }
 #endif
+
+extern "C" {
+JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_getMaskedFrame(JNIEnv* env, jobject, jlong addrFrame)
+{
+    Mat* frame = (Mat*)addrFrame;
+    Mat* mask = grabCutObject->getMaskedImage();
+	cvtColor(*mask, *frame, CV_RGB2RGBA, 4);
+}
+JNIEXPORT jint JNICALL Java_edu_ethz_s3d_GrabCutView_getFrameHeight(JNIEnv* env, jobject)
+{
+	LOG("H: %d ", grabCutObject->getHeight());
+    return grabCutObject->getHeight();
+}
+JNIEXPORT jint JNICALL Java_edu_ethz_s3d_GrabCutView_getFrameWidth(JNIEnv* env, jobject)
+{
+	LOG("H: %d ", grabCutObject->getWidth());
+    return grabCutObject->getWidth();
+}
+JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_grabFrame(JNIEnv* env, jobject)
+{
+    return grabCutObject->grabFrame();
+}
+
+}
