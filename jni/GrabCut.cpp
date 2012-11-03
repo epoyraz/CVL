@@ -1,8 +1,6 @@
 #include "GrabCut.h"
 
 GrabCut::GrabCut() {
-	lastMasked = getFrame();
-	mask.create(lastMasked.rows, lastMasked.cols, CV_8UC1);
 }
 
 GrabCut::~GrabCut() {
@@ -14,34 +12,45 @@ void GrabCut::unsetModels() {
 }
 
 void GrabCut::addForegroundStroke(vector<Point>& fgdPixels) {
-	LOG("Adding foreground Stroke");
 	for (vector<Point>::const_iterator it = fgdPixels.begin(); it != fgdPixels.end(); it++) {
-		LOG("Mask was %d ", mask.at<uchar>(*it));
+		//LOG("Changing at %d, %d ", (*it).x, (*it).y);
 		mask.at<uchar>(*it) = GC_FGD;
 	}
-	LOG("Added foreground Stroke");
 }
 
 void GrabCut::addBackgroundStroke(vector<Point>& bgdPixels) {
-	LOG("Adding background Stroke");
 	for (vector<Point>::const_iterator it = bgdPixels.begin(); it != bgdPixels.end(); it++) {
-		LOG("Mask was %d ", mask.at<uchar>(*it));
+		//LOG("Changing at %d, %d ", (*it).x, (*it).y);
 		mask.at<uchar>(*it) = GC_BGD;
 	}
-	LOG("Added background Stroke");
 }
 
 void GrabCut::executeGrabCut(int iterations) {
 	LOG("Executing GrabCut");
-	grabCut(frame, mask, rect, bgdModel, fgdModel, 0, GC_INIT_WITH_MASK );
-	LOG("Initialized GrabCut");
-	grabCut(frame, mask, rect, bgdModel, fgdModel, 1);
+	grabCut(frame, mask, rect, bgdModel, fgdModel, 1, GC_EVAL);
 	LOG("Executed GrabCut");
+	// Iterate through all pixels and set fore/background
 	for (int i = 0; i < frame.rows; i++) {
 		for (int j = 0; j < frame.cols; j++) {
+			// Extract pixel values
+			Vec3b frameV = frame.at<Vec3b>(i, j);
+			Vec3b lastMaskedV = lastMasked.at<Vec3b>(i, j);
+			char maskV = mask.at<char>(i, j);
+
+			// Iterate through channels
 			for (int d = 0; d < 3; d++) {
-				lastMasked.data[i*3*frame.cols+j*3+d] = frame.data[i*3*frame.cols+j*3+d] * mask.data[i*frame.cols+j];
+				switch (maskV) {
+					case GC_FGD:
+					case GC_PR_FGD:
+						break;
+					default:
+						lastMaskedV[d] = frameV[d] / 2;
+						break;
+				}
 			}
+
+			// Save values back
+			lastMasked.at<Vec3b>(i, j) = lastMaskedV;
 		}
 	}
 	LOG("Created Frame");
@@ -49,8 +58,8 @@ void GrabCut::executeGrabCut(int iterations) {
 
 void GrabCut::grabFrame() {
 	frame = getFrame();
-	mask = Mat(frame.size(), CV_8UC1, GC_EVAL);
-	lastMasked = frame;
+	LOG("Getting Frame");
+	frame.copyTo(lastMasked);
 }
 
 Mat* GrabCut::getMaskedImage() {
@@ -78,4 +87,11 @@ int GrabCut::getHeight() {
 
 int GrabCut::getWidth() {
 	return frame.cols;
+}
+
+void GrabCut::initRect(int left, int top, int right, int bottom) {
+	rect = Rect(Point(left, top), Point(right, bottom));
+	LOG("Rect GrabCut");
+	grabCut(frame, mask, rect, bgdModel, fgdModel, 5, GC_INIT_WITH_RECT );
+	executeGrabCut(1);
 }

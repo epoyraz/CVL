@@ -748,32 +748,28 @@ Java_edu_ethz_s3d_GrabCutView_executeGrabCut(JNIEnv* env,jobject thiz,jfloatArra
 
   LOG("Java_edu_ethz_s3d_GrabCutView_executeGrabCut");
   float* fgdPos = env->GetFloatArrayElements(foreground,0);
-  LOG("Received foreground.");
 
   float* bgdPos = env->GetFloatArrayElements(background,0);
-  LOG("Received background.");
 
   vector<Point> fgdPixels;
   vector<Point> bgdPixels;
 
-  LOG("Startet conversion of foreground.");
   for (int i=0; i < lFgd; i++) {
 	  LOG("Iteration: %d ", i);
 	  fgdPixels.push_back(Point(fgdPos[2*i], fgdPos[2*i+1]));
   }
-  LOG("Finished conversion of foreground.");
 
-  LOG("Startet conversion of background.");
   for (int i=0; i < lBgd; i++) {
 	  LOG("Iteration: %d ", i);
 	  bgdPixels.push_back(Point(bgdPos[2*i], bgdPos[2*i+1]));
   }
-  LOG("Finished conversion of background.");
+
 
   grabCutObject->addForegroundStroke(fgdPixels);
   grabCutObject->addBackgroundStroke(bgdPixels);
 
-  grabCutObject->executeGrabCut(1);
+  LOG("Run Grab");
+  grabCutObject->executeGrabCut(5);
 
   env->ReleaseFloatArrayElements(foreground, fgdPos,0);
   env->ReleaseFloatArrayElements(background, bgdPos,0);
@@ -792,17 +788,18 @@ JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_getMaskedFrame(JNIEnv* env,
 }
 JNIEXPORT jint JNICALL Java_edu_ethz_s3d_GrabCutView_getFrameHeight(JNIEnv* env, jobject)
 {
-	LOG("H: %d ", grabCutObject->getHeight());
     return grabCutObject->getHeight();
 }
 JNIEXPORT jint JNICALL Java_edu_ethz_s3d_GrabCutView_getFrameWidth(JNIEnv* env, jobject)
 {
-	LOG("H: %d ", grabCutObject->getWidth());
     return grabCutObject->getWidth();
 }
 JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_grabFrame(JNIEnv* env, jobject)
 {
     return grabCutObject->grabFrame();
+}
+JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_initGrabCut(JNIEnv* env,jobject thiz, jint left, jint top, jint right, jint bottom) {
+	grabCutObject->initRect(left, top, right, bottom);
 }
 
 }

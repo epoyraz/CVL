@@ -28,6 +28,8 @@ public:
 	void addForegroundStroke(vector<Point>& fgdPixels);
 	// Adds a list of coordinates to the background
 	void addBackgroundStroke(vector<Point>& bgdPixels);
+	// Initialize the grabCut
+	void initRect(int left, int top, int right, int bottom);
 
 	// Executes the actual GrabCut
 	void executeGrabCut(int iterations);

@@ -12,11 +12,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -104,9 +106,9 @@ public class S3D extends Activity
     }
     
     public void startGrabCutView() {
+    	mGlView.onPause();
     	mGrabView = new GrabCutView(this);
     	setContentView(mGrabView);
-    	mGlView.onPause();
     }
     
     public void finishedGrabCut() {
