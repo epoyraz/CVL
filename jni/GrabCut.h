@@ -35,6 +35,8 @@ public:
 	void executeGrabCut(int iterations);
 	// Returns the image masked
 	Mat* getMaskedImage();
+	// Returns the mask
+	Mat* getMask();
 	// Unsets the models to split the image
 	void unsetModels();
 	// Grab Frame

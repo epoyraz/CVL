@@ -66,6 +66,10 @@ Mat* GrabCut::getMaskedImage() {
 	return &lastMasked;
 }
 
+Mat* GrabCut::getMask() {
+	return &mask;
+}
+
 Mat GrabCut::getFrame() {
 	QCAR::State state = QCAR::Renderer::getInstance().begin();
 
