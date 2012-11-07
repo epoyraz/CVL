@@ -34,7 +34,7 @@ extern "C"
 	  grabCutObject->addBackgroundStroke(bgdPixels);
 
 	  LOG("Run Grab");
-	  grabCutObject->executeGrabCut(5);
+	  grabCutObject->executeGrabCut(1);
 
 	  env->ReleaseFloatArrayElements(foreground, fgdPos,0);
 	  env->ReleaseFloatArrayElements(background, bgdPos,0);
