@@ -114,8 +114,8 @@ public class S3D extends Activity {
 
 		RelativeLayout rl = new RelativeLayout(this);
 		RelativeLayout.LayoutParams firstImageParams = new RelativeLayout.LayoutParams(
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+				LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
 		rectButton.setText("done");
 		rectButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -126,8 +126,8 @@ public class S3D extends Activity {
 		});
 
 		RelativeLayout.LayoutParams lp1 = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+				LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
 		lp1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lp1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
@@ -139,8 +139,8 @@ public class S3D extends Activity {
 			}
 		});
 		RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+				LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
 		lp2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lp2.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
@@ -152,8 +152,8 @@ public class S3D extends Activity {
 			}
 		});
 		RelativeLayout.LayoutParams lp3 = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+				LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
 		lp3.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lp3.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
@@ -177,6 +177,7 @@ public class S3D extends Activity {
 		// Initialize with invalid value
 		private int mProgressValue = -1;
 
+		@Override
 		protected Boolean doInBackground(Void... params) {
 			// Prevent the onDestroy() method to overlap with initialization:
 			synchronized (mShutdownLock) {
@@ -208,11 +209,13 @@ public class S3D extends Activity {
 			}
 		}
 
+		@Override
 		protected void onProgressUpdate(Integer... values) {
 			// Do something with the progress value "values[0]", e.g. update
 			// splash screen, progress bar, etc.
 		}
 
+		@Override
 		protected void onPostExecute(Boolean result) {
 			// Done initializing QCAR, proceed to next application
 			// initialization status:
@@ -259,6 +262,7 @@ public class S3D extends Activity {
 
 	/** An async task to load the tracker data asynchronously. */
 	private class LoadTrackerTask extends AsyncTask<Void, Integer, Boolean> {
+		@Override
 		protected Boolean doInBackground(Void... params) {
 			// Prevent the onDestroy() method to overlap:
 			synchronized (mShutdownLock) {
@@ -267,6 +271,7 @@ public class S3D extends Activity {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(Boolean result) {
 			DebugLog.LOGD("LoadTrackerTask::onPostExecute: execution "
 					+ (result ? "successful" : "failed"));
@@ -309,6 +314,7 @@ public class S3D extends Activity {
 	 * Called when the activity first starts or the user navigates back to an
 	 * activity.
 	 */
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		DebugLog.LOGD("ImageTargets::onCreate");
 		super.onCreate(savedInstanceState);
@@ -417,6 +423,7 @@ public class S3D extends Activity {
 	private native void setProjectionMatrix();
 
 	/** Called when the activity will start interacting with the user. */
+	@Override
 	protected void onResume() {
 		DebugLog.LOGD("ImageTargets::onResume");
 		super.onResume();
@@ -444,6 +451,7 @@ public class S3D extends Activity {
 		}
 	}
 
+	@Override
 	public void onConfigurationChanged(Configuration config) {
 		DebugLog.LOGD("ImageTargets::onConfigurationChanged");
 		super.onConfigurationChanged(config);
@@ -456,6 +464,7 @@ public class S3D extends Activity {
 	}
 
 	/** Called when the system is about to start resuming a previous activity. */
+	@Override
 	protected void onPause() {
 		DebugLog.LOGD("ImageTargets::onPause");
 		super.onPause();
@@ -477,6 +486,7 @@ public class S3D extends Activity {
 	private native void deinitApplicationNative();
 
 	/** The final call you receive before your activity is destroyed. */
+	@Override
 	protected void onDestroy() {
 		DebugLog.LOGD("ImageTargets::onDestroy");
 		super.onDestroy();
@@ -739,6 +749,7 @@ public class S3D extends Activity {
 	 * Invoked the first time when the options menu is displayed to give the
 	 * Activity a chance to populate its Menu with menu items.
 	 */
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
@@ -761,6 +772,7 @@ public class S3D extends Activity {
 	private native void switchDatasetAsap();
 
 	/** Invoked when the user selects an item from the Menu */
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item == mFBgdMenuItem) {
 			mGrabView.isForeground = !mGrabView.isForeground;
