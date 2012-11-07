@@ -43,6 +43,9 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	public GrabCutView(Context context) {
 		super(context);
 		
+		//scale on RelativeLayout
+		setAdjustViewBounds(true);
+		setScaleType(ScaleType.CENTER_CROP);
 		// Set everything so the drawing will work
         setOnTouchListener(this);
         //this.setWillNotDraw(false);
