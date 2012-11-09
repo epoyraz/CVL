@@ -51,11 +51,11 @@ public class GrabCutView extends ImageView implements OnTouchListener {
         fgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
         bgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
         fgdColor.setColor(Color.BLUE);
-        fgdColor.setStrokeWidth(10);
+        fgdColor.setStrokeWidth(5);
         bgdColor.setColor(Color.GREEN);
-        bgdColor.setStrokeWidth(10);
+        bgdColor.setStrokeWidth(5);
         initRectColor.setColor(Color.RED);
-        initRectColor.setStrokeWidth(10);
+        initRectColor.setStrokeWidth(5);
         initRectColor.setStyle(Style.STROKE);
         
         // Initialize Image
