@@ -8,6 +8,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import com.qualcomm.QCAR.QCAR;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,17 +17,28 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Style;
+import android.os.AsyncTask;
+import android.os.Debug;
+import android.text.AndroidCharacter;
+import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 public class GrabCutView extends ImageView implements OnTouchListener {
-	private Rect initRect;
+	private Object mShutdownLock = new Object();
 	
+	private Rect initRect;
 	private int frameWidth;
 	private int frameHeight;
+	
+	private RelativeLayout parentLayout;
+	private RectGrabCutTask mRectTask;
+	private StrokeGrabCutTask mStrokeTask;
 	
 	private LinkedList<LinkedList<MotionEvent.PointerCoords>> fgdStrokes;
 	private LinkedList<LinkedList<MotionEvent.PointerCoords>> bgdStrokes;
@@ -40,9 +53,16 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	int hSupplement;
 	int wSupplement;
 
-	public GrabCutView(Context context) {
+	public GrabCutView(Context context, RelativeLayout layoutView) {
 		super(context);
 		
+		parentLayout = layoutView;
+		
+		/*grayScreen = new ImageView(context);
+		grayScreen.setBackgroundColor(Color.GRAY);
+		grayScreen.setco
+		layoutView.addView(grayScreen);*/
+				
 		//scale on RelativeLayout
 		setAdjustViewBounds(true);
 		setScaleType(ScaleType.CENTER_CROP);
@@ -105,11 +125,13 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 					// Drawing is done by the onDraw function
 					break;
 				case MotionEvent.ACTION_UP:
-					// We finish the tracking of points and submit the array to native code
-					float[] fgdCoords = convertToArray(fgdStrokes);
-					float[] bgdCoords = convertToArray(bgdStrokes);
-					executeGrabCut(fgdCoords, bgdCoords, fgdCoords.length/2, bgdCoords.length/2);
-					updateFrame();
+					disableInput();
+					try {
+						mStrokeTask = new StrokeGrabCutTask();
+						mStrokeTask.execute();
+					} catch (Exception e) {
+						DebugLog.LOGE("Executing Stroke Task failed");
+					}
 					break;
 			}
 		}
@@ -128,17 +150,13 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 					initRect.union((int)coordinates.x, (int)coordinates.y);
 					break;
 				case MotionEvent.ACTION_UP:
-					calculateScale();
-					DebugLog.LOGI("Left "+initRect.left+", Top "+initRect.top+", Right "+initRect.right+", Bottom "+ initRect.bottom);
-					int left = (int)(initRect.left / scale + wSupplement);
-					int top = (int)(initRect.top / scale + hSupplement);
-					int right = (int)(initRect.right / scale + wSupplement);
-					int bottom = (int)(initRect.bottom / scale + hSupplement);
-					DebugLog.LOGI("Left "+left+", Top "+top+", Right "+right+", Bottom "+ bottom);
-					DebugLog.LOGI("wSupp: "+wSupplement+" hSupp: "+hSupplement);
-					initGrabCut(left, top, right, bottom);
-					updateFrame();
-					hasRect = true;
+					disableInput();
+					try {
+						mRectTask = new RectGrabCutTask();
+						mRectTask.execute();
+					} catch (Exception e) {
+						DebugLog.LOGE("Executing Rect Task failed");
+					}
 					break;
 						
 			}
@@ -149,15 +167,33 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	}
 
     private float[] convertToArray(LinkedList<LinkedList<PointerCoords>> strokes) {
-    	
+    	//Initialize the lists
     	ArrayList<Float> list = new ArrayList<Float>();
     	Iterator<LinkedList<MotionEvent.PointerCoords>> outerIter = strokes.iterator();
+    	
+    	// Loop through the strokes
     	while (outerIter.hasNext()) {
     		Iterator<MotionEvent.PointerCoords> innerIter = outerIter.next().iterator();
+    		// Initialize the last element and add it to the output points
+    		MotionEvent.PointerCoords last = null;
+    		if (innerIter.hasNext()) {
+    			last = innerIter.next();
+    			list.add(last.x / scale + wSupplement);
+    			list.add(last.y / scale + hSupplement);
+    		}
+    		// Loop through the inner list
     		while (innerIter.hasNext()) {
     			MotionEvent.PointerCoords coord = innerIter.next();
-    			list.add(coord.x / scale + wSupplement);
-    			list.add(coord.y / scale + hSupplement);
+    			float distX = coord.x - last.x;
+    			float distY = coord.y - last.y;
+    			int dist = (int) Math.floor(FloatMath.sqrt(distX*distX + distY*distY)/scale);
+    			distX /= dist;
+    			distY /= dist;
+    			// Insert all points on the line
+    			for (int i = 1; i <= dist; i++) {
+	    			list.add((float)Math.round((last.x + distX*i) / scale + wSupplement));
+	    			list.add((float)Math.round((last.y + distY*i) / scale + hSupplement));
+    			}
     		}
     	}
     	float[] finalArray = new float[list.size()];
@@ -221,5 +257,94 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		Bitmap frameBit = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(frame, frameBit);
 		setImageBitmap(frameBit);
+	}
+	
+	private void disableInput() {
+		setOnTouchListener(null);
+		setColorFilter(Color.GRAY, android.graphics.PorterDuff.Mode.LIGHTEN);
+		Button button = (Button) parentLayout.getChildAt(1);
+		button.setEnabled(false);
+		button = (Button) parentLayout.getChildAt(2);
+		button.setEnabled(false);
+		button = (Button) parentLayout.getChildAt(3);
+		button.setEnabled(false);
+	}
+	
+	private void enableInput() {
+        setOnTouchListener(this);
+		setColorFilter(Color.GRAY, android.graphics.PorterDuff.Mode.DST);
+		Button button = (Button) parentLayout.getChildAt(1);
+		button.setEnabled(true);
+		button = (Button) parentLayout.getChildAt(2);
+		button.setEnabled(true);
+		button = (Button) parentLayout.getChildAt(3);
+		button.setEnabled(true);
+	}
+
+	/** An async task to calculate the GrabCut using some Strokes. */
+	private class RectGrabCutTask extends AsyncTask<Void, Integer, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// Prevent the onDestroy() method to overlap with initialization:
+			synchronized (mShutdownLock) {
+				try {
+					calculateScale();
+					DebugLog.LOGI("Left "+initRect.left+", Top "+initRect.top+", Right "+initRect.right+", Bottom "+ initRect.bottom);
+					int left = (int)(initRect.left / scale + wSupplement);
+					int top = (int)(initRect.top / scale + hSupplement);
+					int right = (int)(initRect.right / scale + wSupplement);
+					int bottom = (int)(initRect.bottom / scale + hSupplement);
+					DebugLog.LOGI("Left "+left+", Top "+top+", Right "+right+", Bottom "+ bottom);
+					DebugLog.LOGI("wSupp: "+wSupplement+" hSupp: "+hSupplement);
+					initGrabCut(left, top, right, bottom);
+					hasRect = true;
+				}
+				catch (Exception e) {
+					DebugLog.LOGE(e.getMessage());
+				}
+			}
+			return true;
+		}
+		@Override
+		protected void onPostExecute(Boolean result) {
+			try {
+				enableInput();
+				updateFrame();
+			}
+			catch (Exception e) {
+				DebugLog.LOGE(e.getMessage());
+			}
+			DebugLog.LOGD("Finished RectTask");
+		}
+	}
+	
+	/** An async task to calculate the GrabCut using some Strokes. */
+	private class StrokeGrabCutTask extends AsyncTask<Void, Integer, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// Prevent the onDestroy() method to overlap with initialization:
+			synchronized (mShutdownLock) {
+				try {
+					float[] fgdCoords = convertToArray(fgdStrokes);
+					float[] bgdCoords = convertToArray(bgdStrokes);
+					executeGrabCut(fgdCoords, bgdCoords, fgdCoords.length/2, bgdCoords.length/2);
+				}
+				catch (Exception e) {
+					DebugLog.LOGE(e.getMessage());
+				}
+			}
+			return true;
+		}
+		@Override
+		protected void onPostExecute(Boolean result) {
+			try {
+				enableInput();
+				updateFrame();
+			}
+			catch (Exception e) {
+				DebugLog.LOGE(e.getMessage());
+			}
+			DebugLog.LOGD("Finished StrokeTask");
+		}
 	}
 }
