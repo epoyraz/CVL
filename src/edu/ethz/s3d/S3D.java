@@ -21,10 +21,10 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
 import com.qualcomm.QCAR.QCAR;
@@ -92,8 +92,7 @@ public class S3D extends Activity {
 
 	// The menu item for swapping data sets:
 	MenuItem mDataSetMenuItem = null;
-	// Menu item for toggling fore/background
-	MenuItem mFBgdMenuItem = null;
+	
 	boolean mIsStonesAndChipsDataSetActive = false;
 
 	/** Static initializer block to load native libraries on start-up. */
@@ -102,68 +101,73 @@ public class S3D extends Activity {
 	}
 
 	public void startGrabCutView() {
+		RelativeLayout rl = new RelativeLayout(this);
+		
 		mGlView.onPause();
-		mGrabView = new GrabCutView(this);
+		mGrabView = new GrabCutView(this, rl);
 
-		Button rectButton = new Button(this);
+		LayoutParams lpImageView = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		rl.addView(mGrabView, lpImageView);
+		
+		generateButtons(rl);
+		
+		// lpImageView was once new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		// Like this we don't need another object
+		addContentView(rl, lpImageView);
+		setContentView(rl);
+	}
+	
+	private void generateButtons(RelativeLayout rl) {
+		// Set LayoutParams
+		LayoutParams lpFgd = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		LayoutParams lpBgd = new LayoutParams(lpFgd);
+		LayoutParams lpDone = new LayoutParams(lpFgd);
+		
+		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+		lpBgd.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		lpBgd.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+		lpDone.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		lpDone.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+		// Create Buttons
+		Button doneButton = new Button(this);
 		Button fgButton = new Button(this);
 		Button bgButton = new Button(this);
-
-		fgButton.setEnabled(false);
-		bgButton.setEnabled(false);
-
-		RelativeLayout rl = new RelativeLayout(this);
-		RelativeLayout.LayoutParams firstImageParams = new RelativeLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT);
-		rectButton.setText("done");
-		rectButton.setOnClickListener(new View.OnClickListener() {
+	
+		// Set text and action
+		doneButton.setText("Accept");
+		doneButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// Toast.makeText(getApplicationContext(),
-				// "Draw rectangle around bject", Toast.LENGTH_SHORT).show();
 				finishedGrabCut();
 			}
 		});
 
-		RelativeLayout.LayoutParams lp1 = new RelativeLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-		lp1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-
 		fgButton.setText("select Foreground");
 		fgButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Mark Object",
-						Toast.LENGTH_SHORT).show();
+				mGrabView.isForeground = true;
 			}
 		});
-		RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-		lp2.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
 		bgButton.setText("select Background");
 		bgButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Mark Background",
-						Toast.LENGTH_SHORT).show();
+				mGrabView.isForeground = false;
 			}
 		});
-		RelativeLayout.LayoutParams lp3 = new RelativeLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp3.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-		lp3.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
-		rl.addView(mGrabView, firstImageParams);
-		rl.addView(fgButton, lp1);
-		rl.addView(bgButton, lp2);
-		rl.addView(rectButton, lp3);
-		addContentView(rl, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
-		setContentView(rl);
+		// Add Buttons to view
+		rl.addView(fgButton, lpFgd);
+		rl.addView(bgButton, lpBgd);
+		rl.addView(doneButton, lpDone);
+
+		// Define logic
+		fgButton.setEnabled(false);
+		bgButton.setEnabled(false);
+		doneButton.setEnabled(false);
 	}
 
 	public void finishedGrabCut() {
@@ -753,8 +757,6 @@ public class S3D extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		mFBgdMenuItem = menu.add("Toggle Fore/Background Strokes");
-
 		mDataSetMenuItem = menu.add("Switch to Tarmac dataset");
 		menu.add("Toggle flash");
 		menu.add("Trigger autofocus");
@@ -774,9 +776,6 @@ public class S3D extends Activity {
 	/** Invoked when the user selects an item from the Menu */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item == mFBgdMenuItem) {
-			mGrabView.isForeground = !mGrabView.isForeground;
-		}
 		if (item == mDataSetMenuItem) {
 			switchDatasetAsap();
 			mIsStonesAndChipsDataSetActive = !mIsStonesAndChipsDataSetActive;
