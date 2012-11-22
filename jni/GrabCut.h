@@ -9,6 +9,8 @@
 #include <QCAR/CameraDevice.h>
 #include <QCAR/Image.h>
 #include <QCAR/State.h>
+#include <QCAR/Tool.h>
+#include <QCAR/Trackable.h>
 #include <QCAR/Frame.h>
 #include <QCAR/Renderer.h>
 
@@ -37,6 +39,8 @@ public:
 	Mat* getMaskedImage();
 	// Returns the mask
 	Mat* getMask();
+	// Returns the mask
+	Mat* getMVMatrix();
 	// Unsets the models to split the image
 	void unsetModels();
 	// Grab Frame
@@ -49,6 +53,8 @@ public:
 
 private:
 	Mat getFrame();
+	Mat getModelViewMat();
+	Mat mvMat;
 	Mat frame, mask, lastMasked;
 	Mat bgdModel, fgdModel;
 	Rect rect;

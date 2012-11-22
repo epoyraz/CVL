@@ -57,18 +57,11 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		super(context);
 		
 		parentLayout = layoutView;
-		
-		/*grayScreen = new ImageView(context);
-		grayScreen.setBackgroundColor(Color.GRAY);
-		grayScreen.setco
-		layoutView.addView(grayScreen);*/
 				
 		//scale on RelativeLayout
 		setAdjustViewBounds(true);
 		setScaleType(ScaleType.CENTER_CROP);
-		// Set everything so the drawing will work
         setOnTouchListener(this);
-        //this.setWillNotDraw(false);
         
         // Initialize drawing stuff
         fgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
@@ -248,6 +241,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	protected native void grabFrame();
 	protected native void initGrabCut(int left, int top, int right, int bottom);
 	protected native void executeGrabCut(float[] foreground, float[] background, int nFgd, int nBgd);
+	public native void moveToStorage();
 	
 	protected void updateFrame() {
 		frameHeight = getFrameHeight();

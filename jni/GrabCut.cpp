@@ -57,8 +57,9 @@ void GrabCut::executeGrabCut(int iterations) {
 }
 
 void GrabCut::grabFrame() {
+	mvMat = getModelViewMat();
 	frame = getFrame();
-	LOG("Getting Frame");
+	LOG("Loaded Frame");
 	frame.copyTo(lastMasked);
 }
 
@@ -70,17 +71,37 @@ Mat* GrabCut::getMask() {
 	return &mask;
 }
 
-Mat GrabCut::getFrame() {
-	QCAR::State state = QCAR::Renderer::getInstance().begin();
+Mat* GrabCut::getMVMatrix() {
+	return &mvMat;
+}
 
+Mat GrabCut::getModelViewMat() {
+	LOG("Getting MV-Matrix");
+	QCAR::State state = QCAR::Renderer::getInstance().begin();
+	// Only get something meaningful if exactly one trackable is tracked
+	if (state.getNumActiveTrackables() == 1) {
+		// Get the model-view matrix
+		// First we have to get the trackable
+		const QCAR::Trackable* trackable = state.getActiveTrackable(0);
+		QCAR::Matrix44F modelViewMatrix = QCAR::Tool::convertPose2GLMatrix(trackable->getPose());
+		return Mat(4, 4, CV_32FC1, modelViewMatrix.data);
+	}
+	return Mat();
+}
+
+Mat GrabCut::getFrame() {
+	LOG("Getting Frame");
+	QCAR::State state = QCAR::Renderer::getInstance().begin();
+	// Get the frame data
 	QCAR::Frame frame = state.getFrame();
 	for (int i = 0; i < frame.getNumImages(); i++)
 	{
-	    const QCAR::Image *qcarImage = frame.getImage(i);
-	    if (qcarImage->getFormat() == QCAR::RGB888)
-	    {
-	    	return Mat(qcarImage->getHeight(), qcarImage->getWidth(), CV_8UC3, (unsigned char *) const_cast<void*>(qcarImage->getPixels()));
-	    }
+		const QCAR::Image *qcarImage = frame.getImage(i);
+		if (qcarImage->getFormat() == QCAR::RGB888)
+		{
+			// Create a matrix with 3 channels, the image height and width
+			return Mat(qcarImage->getHeight(), qcarImage->getWidth(), CV_8UC3, (unsigned char *) const_cast<void*>(qcarImage->getPixels()));
+		}
 	}
 	return Mat();
 }
