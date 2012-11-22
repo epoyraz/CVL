@@ -109,7 +109,7 @@ public class S3D extends Activity {
 		LayoutParams lpImageView = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		rl.addView(mGrabView, lpImageView);
 		
-		generateButtons(rl);
+		generateGrabViewButtons(rl);
 		
 		// lpImageView was once new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		// Like this we don't need another object
@@ -117,7 +117,7 @@ public class S3D extends Activity {
 		setContentView(rl);
 	}
 	
-	private void generateButtons(RelativeLayout rl) {
+	private void generateGrabViewButtons(RelativeLayout rl) {
 		// Set LayoutParams
 		LayoutParams lpFgd = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		LayoutParams lpBgd = new LayoutParams(lpFgd);
@@ -173,7 +173,9 @@ public class S3D extends Activity {
 	public void finishedGrabCut() {
 		mGlView.onResume();
 		setContentView(mGlView);
+		mGrabView.moveToStorage();
 		mGrabView = null;
+		DebugLog.LOGD("Stored Data and resumed Displaying");
 	}
 
 	/** An async task to initialize QCAR asynchronously. */
