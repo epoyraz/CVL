@@ -1,2 +1,11 @@
+/.project
+/.classpath
+libs
+/libs
+/bin
+/bin
+bin
+bin
+/jni/Android.mk
 
 .DS_Store
