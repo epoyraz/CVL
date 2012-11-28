@@ -42,6 +42,9 @@
 #include "SampleUtils.h"
 #include "Texture.h"
 #include "CubeShaders.h"
+#include "SimpleFragmentShader.h"
+#include "SimpleVertexShader.h"
+#include "RaycastVertexShader.h"
 #include "Teapot.h"
 
 #ifdef __cplusplus
@@ -399,42 +402,15 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
                               (const GLvoid*) &teapotVertices[0]);
         glVertexAttribPointer(normalHandle, 3, GL_FLOAT, GL_FALSE, 0,
                               (const GLvoid*) &teapotNormals[0]);
-        glVertexAttribPointer(textureCoordHandle, 2, GL_FLOAT, GL_FALSE, 0,
-                              (const GLvoid*) &teapotTexCoords[0]);
-        
+  //      glVertexAttribPointer(textureCoordHandle, 2, GL_FLOAT, GL_FALSE, 0,
+  //                            (const GLvoid*) &teapotTexCoords[0]);
+  //      bindTexture(TEXTURE_2D,);
         glEnableVertexAttribArray(vertexHandle);
         glEnableVertexAttribArray(normalHandle);
-        glEnableVertexAttribArray(textureCoordHandle);
+     //   glEnableVertexAttribArray(textureCoordHandle);
         
-       // glActiveTexture(GL_TEXTURE0);
-       // glBindTexture(GL_TEXTURE_2D, thisTexture->mTextureID);
-
-        glDisable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D,0);
-
-        GLfloat color1[] = { 255,   0,   0 };
-        GLfloat color2[] = {   0, 255,   0 };
-        GLfloat color3[] = {   0,   0, 255 };
-        GLfloat color4[] = { 255, 255,   0 };
-        GLfloat color5[] = {   0, 255, 255 };
-        GLfloat color6[] = { 255, 255, 255 };
-
-        GLfloat color[] = {
-            color1[0], color1[1], color1[2],
-            color1[0], color1[1], color1[2],
-            color1[0], color1[1], color1[2],
-            color1[0], color1[1], color1[2],
-            color1[0], color1[1], color1[2],
-            color1[0], color1[1], color1[2],
-
-            color2[0], color2[1], color2[2],
-            color2[0], color2[1], color2[2],
-        };
-
-        glVertexAttribPointer(colorHandle, 3,
-           		GL_FLOAT, GL_FALSE, 0,
-           		(const GLvoid*) &color[0]);
-        glEnableVertexAttribArray(colorHandle);
+      //  glActiveTexture(GL_TEXTURE0);
+      //  glBindTexture(GL_TEXTURE_2D, thisTexture->mTextureID);
 
         glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE,
                            (GLfloat*)&modelViewProjection.data[0] );
