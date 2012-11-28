@@ -2,9 +2,10 @@
 #include <jni.h>
 #include <android/log.h>
 #include "GrabCut.h"
-#include "S3D.h"
+#include "SilhouetteStorage.h"
 
 GrabCut* grabCutObject;
+SilhouetteStorage* sStorage = NULL;
 
 extern "C"
 {
@@ -65,7 +66,7 @@ extern "C"
 	JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_initGrabCut(JNIEnv* env,jobject thiz, jint left, jint top, jint right, jint bottom) {
 		grabCutObject->initRect(left, top, right, bottom);
 	}
-	JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_moveToStorage(JNIEnv* env,jobject thiz, jint left, jint top, jint right, jint bottom) {
+	JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_moveToStorage(JNIEnv* env,jobject thiz) {
 		if (sStorage == NULL) {
 			sStorage = new SilhouetteStorage();
 		}

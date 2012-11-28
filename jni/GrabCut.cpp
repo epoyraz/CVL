@@ -58,6 +58,11 @@ void GrabCut::executeGrabCut(int iterations) {
 
 void GrabCut::grabFrame() {
 	mvMat = getModelViewMat();
+	LOG("Projection Mat:");
+	LOG(" %f %f %f %f", mvMat->at<float>(0,0), mvMat->at<float>(0,1), mvMat->at<float>(0,2), mvMat->at<float>(0,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(1,0), mvMat->at<float>(1,1), mvMat->at<float>(1,2), mvMat->at<float>(1,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(2,0), mvMat->at<float>(2,1), mvMat->at<float>(2,2), mvMat->at<float>(2,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(3,0), mvMat->at<float>(3,1), mvMat->at<float>(3,2), mvMat->at<float>(3,3));
 	frame = getFrame();
 	LOG("Loaded Frame");
 	frame.copyTo(lastMasked);
@@ -72,10 +77,15 @@ Mat* GrabCut::getMask() {
 }
 
 Mat* GrabCut::getMVMatrix() {
-	return &mvMat;
+	LOG("Returned Projection Mat:");
+	LOG(" %f %f %f %f", mvMat->at<float>(0,0), mvMat->at<float>(0,1), mvMat->at<float>(0,2), mvMat->at<float>(0,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(1,0), mvMat->at<float>(1,1), mvMat->at<float>(1,2), mvMat->at<float>(1,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(2,0), mvMat->at<float>(2,1), mvMat->at<float>(2,2), mvMat->at<float>(2,3));
+	LOG(" %f %f %f %f", mvMat->at<float>(3,0), mvMat->at<float>(3,1), mvMat->at<float>(3,2), mvMat->at<float>(3,3));
+	return mvMat;
 }
 
-Mat GrabCut::getModelViewMat() {
+Mat* GrabCut::getModelViewMat() {
 	LOG("Getting MV-Matrix");
 	QCAR::State state = QCAR::Renderer::getInstance().begin();
 	// Only get something meaningful if exactly one trackable is tracked
@@ -84,9 +94,18 @@ Mat GrabCut::getModelViewMat() {
 		// First we have to get the trackable
 		const QCAR::Trackable* trackable = state.getActiveTrackable(0);
 		QCAR::Matrix44F modelViewMatrix = QCAR::Tool::convertPose2GLMatrix(trackable->getPose());
-		return Mat(4, 4, CV_32FC1, modelViewMatrix.data);
+
+		// We need to allocate the data on the heap
+		float* data = new float[16];
+		for (int i = 0; i < 4*4; i++) {
+			data[i] = modelViewMatrix.data[i];
+		}
+		LOG ("Allocated Memory for mv-Matrix and copied data.");
+
+		// Create matrix
+		return new Mat(4, 4, DataType<float>::type, data);
 	}
-	return Mat();
+	return new Mat();
 }
 
 Mat GrabCut::getFrame() {

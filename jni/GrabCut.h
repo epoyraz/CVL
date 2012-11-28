@@ -53,8 +53,8 @@ public:
 
 private:
 	Mat getFrame();
-	Mat getModelViewMat();
-	Mat mvMat;
+	Mat* getModelViewMat();
+	Mat* mvMat;
 	Mat frame, mask, lastMasked;
 	Mat bgdModel, fgdModel;
 	Rect rect;

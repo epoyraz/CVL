@@ -49,6 +49,9 @@ public class S3D extends Activity {
 	// Our OpenGL view:
 	private QCARSampleGLView mGlView;
 	private GrabCutView mGrabView;
+	
+	// Our Reconstruction:
+	private Reconstruction mReconstruction;
 
 	// The view to display the sample splash screen:
 	private ImageView mSplashScreenView;
@@ -102,6 +105,8 @@ public class S3D extends Activity {
 
 	public void startGrabCutView() {
 		RelativeLayout rl = new RelativeLayout(this);
+		
+		mReconstruction = new Reconstruction(10, 10, 10);
 		
 		mGlView.onPause();
 		mGrabView = new GrabCutView(this, rl);
@@ -176,6 +181,7 @@ public class S3D extends Activity {
 		mGrabView.moveToStorage();
 		mGrabView = null;
 		DebugLog.LOGD("Stored Data and resumed Displaying");
+		mReconstruction.refineWithLatestCut();
 	}
 
 	/** An async task to initialize QCAR asynchronously. */

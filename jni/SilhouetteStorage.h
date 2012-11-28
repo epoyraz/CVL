@@ -8,6 +8,7 @@
 #ifndef SILOUHETTESTORAGE_H_
 #define SILOUHETTESTORAGE_H_
 
+#include <android/log.h>
 #include <vector>
 
 #include <opencv2/core/core.hpp>
@@ -16,6 +17,11 @@
 using namespace cv;
 using namespace std;
 
+#define LOG(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#ifndef LOG_TAG
+#define LOG_TAG "GrabCut"
+#endif
+
 class SilhouetteStorage {
 public:
 	SilhouetteStorage();
@@ -23,6 +29,8 @@ public:
 	void addSilhouette(Mat* silhouette, Mat* mvMat);
 	Mat** getAllSilhouettes();
 	Mat** getAllMVMatrices();
+	Mat* getLastSilhouette();
+	Mat* getLastMVMatrice();
 	int getNumSilhouettes();
 private:
 	vector<Mat*>* silhouettes;

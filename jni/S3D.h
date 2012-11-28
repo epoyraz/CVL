@@ -11,7 +11,7 @@
 
 #include "SilhouetteStorage.h"
 
-SilhouetteStorage* sStorage = NULL;
+extern SilhouetteStorage* sStorage;
 
 
 
