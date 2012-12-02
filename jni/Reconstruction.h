@@ -32,8 +32,14 @@ public:
 	void addSilhouette(Mat* silhouette, Mat* mvMatrix);
 
 private:
+	void calculateSizes();
+	char getAt(int x, int y, int z);
+	void setAt(int x, int y, int z, char value);
+	IplImage* voxe;
 	bool* voxels;
 	int x, y, z;
+	int width, height;
+	int nWidth, nHeight;
 };
 
 

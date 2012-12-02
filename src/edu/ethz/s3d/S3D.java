@@ -182,6 +182,7 @@ public class S3D extends Activity {
 		mGrabView = null;
 		DebugLog.LOGD("Stored Data and resumed Displaying");
 		mReconstruction.refineWithLatestCut();
+		DebugLog.LOGD("Refined 3D Reconstruction");
 	}
 
 	/** An async task to initialize QCAR asynchronously. */

@@ -1,6 +1,7 @@
 #include "GrabCut.h"
 
 GrabCut::GrabCut() {
+	mvMat = NULL;
 }
 
 GrabCut::~GrabCut() {
@@ -42,6 +43,7 @@ void GrabCut::executeGrabCut(int iterations) {
 				switch (maskV) {
 					case GC_FGD:
 					case GC_PR_FGD:
+						lastMaskedV[d] = frameV[d];
 						break;
 					default:
 						lastMaskedV[d] = frameV[d] / 2;
@@ -73,7 +75,10 @@ Mat* GrabCut::getMaskedImage() {
 }
 
 Mat* GrabCut::getMask() {
-	return &mask;
+	char* maskData = new char(mask.cols*mask.rows);
+	memcpy(maskData, mask.data, mask.cols*mask.rows*sizeof(char));
+	Mat* maskCopy = new Mat(mask.cols, mask.rows, CV_8UC3, maskData);
+	return maskCopy;
 }
 
 Mat* GrabCut::getMVMatrix() {
