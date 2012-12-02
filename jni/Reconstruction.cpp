@@ -19,7 +19,7 @@ Reconstruction::Reconstruction(int x_in, int y_in, int z_in) :
 	LOG("Sizes calculated.");
 
 	voxe = cvCreateImage(cvSize(width, height) , IPL_DEPTH_8U, 4);
-	memset(voxe->imageData, (unsigned char) 255, x*y*z*4*sizeof(char));
+	memset(voxe->imageData, (uchar) 255, width*height*4*sizeof(uchar));
 	LOG("Image all voxels set true.");
 
 }
