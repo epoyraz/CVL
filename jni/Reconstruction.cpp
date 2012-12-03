@@ -11,8 +11,12 @@
 Reconstruction::Reconstruction(int x_in, int y_in, int z_in) :
 	x(x_in), y(y_in), z(z_in) {
 	LOG("Allocating Voxels. x: %d , y: %d , z: %d ", x, y, z);
-	voxels = new bool[x * y * z];
-	memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
+	//TODO: Use the following lines again:
+	//voxels = new bool[x * y * z];
+	//memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
+	voxels = new bool[x * y * 100];
+	//memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
+	memset(voxels, (unsigned char)255, x*y*100*sizeof(bool));
 	LOG("All voxels set true.");
 
 	calculateSizes();
