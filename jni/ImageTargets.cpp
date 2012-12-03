@@ -428,10 +428,10 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        	char texData[4] = {(char)255, (char)255, (char)255, (char) 255};
+        	char texData[16] = {(char)255};
 
         	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
-        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texData);
         }
 
 

@@ -62,7 +62,7 @@ unsigned int Reconstruction::getTexture() {
 	cvResize(voxe, texValues);
 
 	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texValues->imageData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texValues->imageData);
 
 	cvReleaseImage(&texValues);
 
