@@ -28,7 +28,9 @@ void Reconstruction::calculateSizes() {
 	// Calculate how many pixels we need
 	int prod = x * y * z;
 	// Calculate the square root to get the best distribution on both axis
-	width = ceil(sqrt((float)prod));
+	//TODO: Use the following line again:
+	//width = ceil(sqrt((float)prod));
+	width = 100;
 	// Get the number of images in first direction (makes the first dimension larger)
 	nWidth = ceil((float)width/(float)x);
 	// Calculate the number of images in second direction
@@ -79,6 +81,7 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 	int countProj = 0;
 	int countUnset = 0;
 	for (int i = 0; i < 10; i++) {
+		LOG("Iteration %d", i);
 		for (int j = 0; j < y; j++) {
 			for (int k = 0; k < z; k++) {
 				count++;
