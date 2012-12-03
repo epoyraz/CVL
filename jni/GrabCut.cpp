@@ -78,7 +78,7 @@ Mat* GrabCut::getMask() {
 	char* maskData = new char[mask.cols*mask.rows];
 	memcpy(maskData, mask.data, mask.cols*mask.rows*sizeof(char));
 	Mat* maskCopy = new Mat(mask.cols, mask.rows, CV_8UC3, maskData);
-	return maskCopy;
+	return &mask;
 }
 
 Mat* GrabCut::getMVMatrix() {

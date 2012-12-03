@@ -10,7 +10,6 @@
 
 #include <jni.h>
 #include <android/log.h>
-#include "Reconstruction.h"
 #include "S3D.h"
 
 Reconstruction* reconstructionHandler = NULL;

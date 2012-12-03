@@ -10,8 +10,10 @@
 #define S3D_H_
 
 #include "SilhouetteStorage.h"
+#include "Reconstruction.h"
 
 extern SilhouetteStorage* sStorage;
+extern Reconstruction* reconstructionHandler;
 
 
 
