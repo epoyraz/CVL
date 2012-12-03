@@ -89,10 +89,9 @@ float getVolumeValue(vec3 volpos)\
 \
 void main() \
 { \
-	   	vec2 texC = pos.xy/pos.w;\
+		vec2 texC = pos.xy/pos.w;\
 		texC.x = 0.5*texC.x + 0.5;\
-		texC.y = 0.5*texC.y + 0.5;\	\
-		vec4 vpos = frontColor;\
+		texC.y = 0.5*texC.y + 0.5;\
 	\
 		float cont = 0.0;\
 	\
@@ -102,7 +101,8 @@ void main() \
 		vec4 value = vec4(0, 0, 0, 0);\
 	\
 		float opacityFactor = 8.0;\
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); \
+		float lightFactor = 1.3;\
+        gl_FragColor = vec4(1.0,1.0,1.0,1.0); \
 } \
 ";
 

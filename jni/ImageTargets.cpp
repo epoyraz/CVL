@@ -67,7 +67,7 @@ unsigned int backgroundTexture  = 0;
 unsigned int shaderProgramID    = 0;
 GLint vertexHandle              = 0;
 GLint normalHandle              = 0;
-GLint textureCoordHandle        = 0;
+//GLint textureCoordHandle        = 0;
 GLint mvpMatrixHandle           = 0;
 GLint vertexColorHandle			= 0;
 //GLint projectionMatrixHandle    = 0;
@@ -407,13 +407,13 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
                 (const GLvoid*) &color[0]);
         glVertexAttribPointer(normalHandle, 3, GL_FLOAT, GL_FALSE, 0,
                              (const GLvoid*) &teapotNormals[0]);
-        glVertexAttribPointer(textureCoordHandle, 2, GL_FLOAT, GL_FALSE, 0,
-                              (const GLvoid*) &teapotTexCoords[0]);
+//        glVertexAttribPointer(textureCoordHandle, 2, GL_FLOAT, GL_FALSE, 0,
+//                              (const GLvoid*) &teapotTexCoords[0]);
 
         glEnableVertexAttribArray(vertexHandle);
         glEnableVertexAttribArray(normalHandle);
         glEnableVertexAttribArray(vertexColorHandle);
-        glEnableVertexAttribArray(textureCoordHandle);
+//        glEnableVertexAttribArray(textureCoordHandle);
         
         unsigned int texId = 0;
         glActiveTexture(GL_TEXTURE0);
@@ -452,12 +452,12 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  //  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 #else
     glDisableVertexAttribArray(vertexHandle);
     glDisableVertexAttribArray(normalHandle);
-    glDisableVertexAttribArray(textureCoordHandle);
+   // glDisableVertexAttribArray(textureCoordHandle);
     glDisableVertexAttribArray(vertexColorHandle);
 #endif
 
@@ -745,8 +745,8 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
                                                 "vertexPosition");
     normalHandle        = glGetAttribLocation(shaderProgramID,
                                                 "vertexNormal");
-    textureCoordHandle  = glGetAttribLocation(shaderProgramID,
-                                                "vertexTexCoord");
+  //  textureCoordHandle  = glGetAttribLocation(shaderProgramID,
+  //                                              "vertexTexCoord");
     mvpMatrixHandle     = glGetUniformLocation(shaderProgramID,
                                                 "modelViewProjectionMatrix");
 
