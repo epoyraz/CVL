@@ -16,6 +16,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <QCAR/QCAR.h>
+#include <QCAR/CameraDevice.h>
+#include <QCAR/Tool.h>
+
 using namespace cv;
 using namespace std;
 
@@ -33,9 +37,11 @@ public:
 
 private:
 	void calculateSizes();
+	void getCameraMatrix();
 	char getAt(int x, int y, int z);
 	void setAt(int x, int y, int z, char value);
 	IplImage* voxe;
+	Mat* cameraMatrix;
 	bool* voxels;
 	int x, y, z;
 	int width, height;

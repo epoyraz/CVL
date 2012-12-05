@@ -94,7 +94,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	}
 	
     public boolean onTouch(View v, MotionEvent event) {
-		DebugLog.LOGD("S3DView::onTouch");
+		//DebugLog.LOGD("S3DView::onTouch");
 		// Select corresponding list
 		LinkedList<LinkedList<MotionEvent.PointerCoords>> outerList = isForeground ? fgdStrokes : bgdStrokes;
 		// Initialize coordinates object
@@ -202,7 +202,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	@Override
     public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-        DebugLog.LOGD("S3DView::onDraw");
+        //DebugLog.LOGD("S3DView::onDraw");
         
         if (drawRect) {
         	canvas.drawRect(initRect, initRectColor);
