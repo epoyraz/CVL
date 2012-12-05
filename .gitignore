@@ -16,3 +16,9 @@ bin
 *.o
 
 *.d
+
+gen/edu/ethz/s3d/R.java
+
+gen/org/opencv/R.java
+
+project.properties
