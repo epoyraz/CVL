@@ -82,11 +82,6 @@ Mat* GrabCut::getMask() {
 }
 
 Mat* GrabCut::getMVMatrix() {
-	LOG("Returned Projection Mat:");
-	LOG(" %f %f %f %f", mvMat->at<float>(0,0), mvMat->at<float>(0,1), mvMat->at<float>(0,2), mvMat->at<float>(0,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(1,0), mvMat->at<float>(1,1), mvMat->at<float>(1,2), mvMat->at<float>(1,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(2,0), mvMat->at<float>(2,1), mvMat->at<float>(2,2), mvMat->at<float>(2,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(3,0), mvMat->at<float>(3,1), mvMat->at<float>(3,2), mvMat->at<float>(3,3));
 	return mvMat;
 }
 
@@ -103,7 +98,7 @@ Mat* GrabCut::getModelViewMat() {
 		// We need to allocate the data on the heap
 		float* data = new float[16];
 		for (int i = 0; i < 4*4; i++) {
-			data[i] = modelViewMatrix.data[i];
+			data[i] = modelViewMatrix.data[(i%4)*4+(i/4)];
 		}
 		LOG ("Allocated Memory for mv-Matrix and copied data.");
 
