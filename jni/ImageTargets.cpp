@@ -38,6 +38,7 @@
 #include <QCAR/CameraCalibration.h>
 #include <QCAR/UpdateCallback.h>
 #include <QCAR/DataSet.h>
+#include "SampleMath.h"
 #include "S3D.h"
 #include "GrabCut.h"
 #include "SampleUtils.h"
@@ -391,6 +392,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 
         QCAR::Matrix44F modelViewProjection;
 
+
         SampleUtils::translatePoseMatrix(0.0f, 0.0f, kObjectScale,
                                          &modelViewMatrix.data[0]);
         SampleUtils::scalePoseMatrix(kObjectScale, kObjectScale, kObjectScale,
@@ -398,6 +400,10 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         SampleUtils::multiplyMatrix(&projectionMatrix.data[0],
                                     &modelViewMatrix.data[0] ,
                                     &modelViewProjection.data[0]);
+
+        LOG("ModelView : X (%f), Y (%f), Z (%f)", modelViewMatrix.data[0], modelViewMatrix.data[1], modelViewMatrix.data[2]);
+        QCAR::Matrix44F inverseModelView = SampleMath::Matrix44FTranspose(SampleMath::Matrix44FInverse(modelViewMatrix));
+        QCAR::Vec3F cameraPosition(inverseModelView.data[12], inverseModelView.data[13], inverseModelView.data[14]);
 
         glUseProgram(shaderProgramID);
          
@@ -433,6 +439,10 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
         	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texData);
         }
+          LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
+
+        glUniform3fv(glGetUniformLocation(shaderProgramID, "uBackCoord"),3,(const GLfloat*) &cameraPosition.data[0]);
+        glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), texId);
 
 
         glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE,
