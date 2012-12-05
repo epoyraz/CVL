@@ -107,7 +107,7 @@ void main() \
 \
 	float opacityFactor = 8.0;\
 	float lightFactor = 1.3;\
-	for(int i=0;i<50;i+=1)\
+	for(float i=0.0;i<steps;i+=1.0)\
 	{\
 		vec2 tf_pos;\
 		tf_pos.x = getVolumeValue(vpos.xyz);\
@@ -115,8 +115,13 @@ void main() \
 		value = vec4(tf_pos.x);\
 		sample.a = value.a * opacityFactor * (1.0/steps);\
 		sample.rgb = value.rgb * sample.a * lightFactor;\
+		accum.rgb += (1.0 - accum.a) * sample.rgb;\
+		accum.a += sample.a;\
+		vpos.xyz += Step;\
+		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
+		    break;\
 	}\
-	gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\
+	gl_FragColor = accum;\
 } \
 ";
 
