@@ -9,3 +9,10 @@ bin
 /jni/Android.mk
 
 .DS_Store
+*.so
+
+*.a
+
+*.o
+
+*.d

@@ -51,7 +51,7 @@ uniform sampler2D texSampler2D; \
 varying vec4 frontColor;\
 varying vec4 pos;\
 \
-uniform sampler2D uBackCoord;\
+uniform vec4 uBackCoord;\
 uniform sampler2D uVolData;\
 uniform sampler2D uTransferFunction;\
 \
@@ -89,20 +89,34 @@ float getVolumeValue(vec3 volpos)\
 \
 void main() \
 { \
-		vec2 texC = pos.xy/pos.w;\
-		texC.x = 0.5*texC.x + 0.5;\
-		texC.y = 0.5*texC.y + 0.5;\
-	\
-		float cont = 0.0;\
-	\
-	\
-		vec4 accum = vec4(0, 0, 0, 0);\
-		vec4 sample = vec4(0.0, 0.0, 0.0, 0.0);\
-		vec4 value = vec4(0, 0, 0, 0);\
-	\
-		float opacityFactor = 8.0;\
-		float lightFactor = 1.3;\
-        gl_FragColor = vec4(1.0,1.0,1.0,1.0); \
+   	vec2 texC = pos.xy/pos.w;\
+	texC.x = 0.5*texC.x + 0.5;\
+	texC.y = 0.5*texC.y + 0.5;\
+    vec4 backColor = uBackCoord;\
+\
+	vec3 dir = backColor.rgb - frontColor.rgb;\
+	vec4 vpos = frontColor;\
+\
+	float cont = 0.0;\
+	vec3 Step = dir/steps;\
+\
+\
+	vec4 accum = vec4(0, 0, 0, 0);\
+	vec4 sample = vec4(0.0, 0.0, 0.0, 0.0);\
+	vec4 value = vec4(0, 0, 0, 0);\
+\
+	float opacityFactor = 8.0;\
+	float lightFactor = 1.3;\
+	for(int i=0;i<50;i+=1)\
+	{\
+		vec2 tf_pos;\
+		tf_pos.x = getVolumeValue(vpos.xyz);\
+		tf_pos.y = 0.5;\
+		value = vec4(tf_pos.x);\
+		sample.a = value.a * opacityFactor * (1.0/steps);\
+		sample.rgb = value.rgb * sample.a * lightFactor;\
+	}\
+	gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\
 } \
 ";
 
