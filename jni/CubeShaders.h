@@ -20,6 +20,7 @@ static const char* cubeMeshVertexShader = " \
   \
 attribute vec4 vertexPosition; \
 attribute vec4 vertexNormal; \
+attribute vec4 vertexTexCoord; \
 attribute vec4 aVertexColor;\
 \
 varying vec4 frontColor;\
@@ -38,22 +39,19 @@ void main() \
 ";
 
 
+//return mix( texture2D(texSampler2D,texpos1).x, texture2D(texSampler2D,texpos2).x, (volpos.z*numberOfSlices)-s1);\
+
 static const char* cubeFragmentShader = " \
- \
-precision mediump float; \
- \
-varying vec2 texCoord; \
-varying vec4 normal; \
- \
-uniform sampler2D texSampler2D; \
- \
 \
+precision mediump float; \
+\
+varying vec4 normal; \
 varying vec4 frontColor;\
 varying vec4 pos;\
 \
+uniform sampler2D texSampler2D; \
+\
 uniform vec4 uBackCoord;\
-uniform sampler2D uVolData;\
-uniform sampler2D uTransferFunction;\
 \
 const float steps = 50.0;\
 const float numberOfSlices = 10.0;\
@@ -84,12 +82,12 @@ float getVolumeValue(vec3 volpos)\
 	texpos2.x = dx2+(volpos.x/slicesOverX);\
 	texpos2.y = dy2+(volpos.y/slicesOverY);\
 \
-	return mix( texture2D(uVolData,texpos1).x, texture2D(uVolData,texpos2).x, (volpos.z*numberOfSlices)-s1);\
+	return texture2D(texSampler2D,texpos1).r;\
 }\
 \
 void main() \
 { \
-   	vec2 texC = pos.xy/pos.w;\
+    vec2 texC = pos.xy/pos.w;\
 	texC.x = 0.5*texC.x + 0.5;\
 	texC.y = 0.5*texC.y + 0.5;\
     vec4 backColor = uBackCoord;\
@@ -111,15 +109,14 @@ void main() \
 	{\
 		vec2 tf_pos;\
 		tf_pos.x = getVolumeValue(vpos.xyz);\
-		tf_pos.y = 0.5;\
 		value = vec4(tf_pos.x);\
 		sample.a = value.a * opacityFactor * (1.0/steps);\
 		sample.rgb = value.rgb * sample.a * lightFactor;\
 		accum.rgb += (1.0 - accum.a) * sample.rgb;\
 		accum.a += sample.a;\
-		vpos.xyz += Step;\
-		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
-		    break;\
+		/*vpos.xyz += Step;\
+		/*if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
+		    break;*/\
 	}\
 	gl_FragColor = accum;\
 } \

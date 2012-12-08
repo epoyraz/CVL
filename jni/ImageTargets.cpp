@@ -57,6 +57,7 @@ extern "C"
 // Textures:
 int textureCount                = 0;
 Texture** textures              = 0;
+unsigned int texId = 0;
 unsigned int backgroundTexture  = 0;
 
 // OpenGL ES 2.0 specific:
@@ -71,8 +72,6 @@ GLint normalHandle              = 0;
 //GLint textureCoordHandle        = 0;
 GLint mvpMatrixHandle           = 0;
 GLint vertexColorHandle			= 0;
-//GLint projectionMatrixHandle    = 0;
-//GLint modelViewMatrixHandle     = 0;
 #endif
 
 // Screen dimensions:
@@ -86,6 +85,7 @@ bool isActivityInPortraitMode   = false;
 QCAR::Matrix44F projectionMatrix;
 
 // Constants:
+// Attention! The same value is also defined in GrabCut.cpp
 static const float kObjectScale = 3.f;
 
 QCAR::DataSet* dataSetStonesAndChips    = 0;
@@ -321,13 +321,12 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 {
 
     // Would be too verbose: LOG("Java_edu_ethz_S3D_GLRenderer_renderFrame");
-
     // Clear color and depth buffer 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Get the state from QCAR and mark the beginning of a rendering section
     QCAR::State state = QCAR::Renderer::getInstance().begin();
-
+    
     // Explicitly render the Video Background
     QCAR::Renderer::getInstance().drawVideoBackground();
        
@@ -392,7 +391,6 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 
         QCAR::Matrix44F modelViewProjection;
 
-
         SampleUtils::translatePoseMatrix(0.0f, 0.0f, kObjectScale,
                                          &modelViewMatrix.data[0]);
         SampleUtils::scalePoseMatrix(kObjectScale, kObjectScale, kObjectScale,
@@ -412,42 +410,28 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         glVertexAttribPointer(vertexColorHandle,3,GL_FLOAT, GL_FALSE, 0,
                 (const GLvoid*) &color[0]);
         glVertexAttribPointer(normalHandle, 3, GL_FLOAT, GL_FALSE, 0,
-                             (const GLvoid*) &teapotNormals[0]);
-//        glVertexAttribPointer(textureCoordHandle, 2, GL_FLOAT, GL_FALSE, 0,
-//                              (const GLvoid*) &teapotTexCoords[0]);
+                              (const GLvoid*) &teapotNormals[0]);
 
         glEnableVertexAttribArray(vertexHandle);
         glEnableVertexAttribArray(normalHandle);
         glEnableVertexAttribArray(vertexColorHandle);
-//        glEnableVertexAttribArray(textureCoordHandle);
         
-        unsigned int texId = 0;
-        glActiveTexture(GL_TEXTURE0);
         if (reconstructionHandler != NULL) {
+        	 glDeleteTextures(1, &texId);
         	 texId = reconstructionHandler->getTexture();
         }
-        else {
-        	glGenTextures(1, &texId);
-        	glBindTexture(GL_TEXTURE_2D, texId);
-        	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        	char texData[16] = {(char)255};
-
-        	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
-        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
-        }
-          LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
+        LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
 
         glUniform3fv(glGetUniformLocation(shaderProgramID, "uBackCoord"),3,(const GLfloat*) &cameraPosition.data[0]);
-        glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), texId);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texId);
+        //glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), 0);
+        //glBindSampler(0, linearFiltering);
 
 
         glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE,
                            (GLfloat*)&modelViewProjection.data[0] );
-
         glDrawElements(GL_TRIANGLES, NUM_TEAPOT_OBJECT_INDEX, GL_UNSIGNED_SHORT,
                        (const GLvoid*) &teapotIndices[0]);
 
@@ -746,6 +730,16 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
      //           textures[i]->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
      //           (GLvoid*)  textures[i]->mData);
     }
+
+	glGenTextures(1, &texId);
+	glBindTexture(GL_TEXTURE_2D, texId);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	char texData[16] = {(char)255};
+
+	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
 #ifndef USE_OPENGL_ES_1_1
   
     shaderProgramID     = SampleUtils::createProgramFromBuffer(cubeMeshVertexShader,
@@ -755,19 +749,13 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
                                                 "vertexPosition");
     normalHandle        = glGetAttribLocation(shaderProgramID,
                                                 "vertexNormal");
-  //  textureCoordHandle  = glGetAttribLocation(shaderProgramID,
-  //                                              "vertexTexCoord");
+//    textureCoordHandle  = glGetAttribLocation(shaderProgramID,
+//                                                "vertexTexCoord");
     mvpMatrixHandle     = glGetUniformLocation(shaderProgramID,
                                                 "modelViewProjectionMatrix");
 
-    //vertexHandle        		= glGetAttribLocation(shaderProgramID,
-    //                                            "aVertexPosition");
     vertexColorHandle         	= glGetAttribLocation(shaderProgramID,
                                                 "aVertexColor");
-    //projectionMatrixHandle      = glGetAttribLocation(shaderProgramID,
-    //											"uPMatrix");
-    //modelViewMatrixHandle		= glGetAttribLocation(shaderProgramID,
-    //											"uMVMatrix");
 
 #endif
 
