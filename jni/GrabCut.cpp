@@ -1,5 +1,7 @@
 #include "GrabCut.h"
 
+const float kObjectScale = 3.f;
+
 GrabCut::GrabCut() {
 	mvMat = NULL;
 }
@@ -94,6 +96,10 @@ Mat* GrabCut::getModelViewMat() {
 		// First we have to get the trackable
 		const QCAR::Trackable* trackable = state.getActiveTrackable(0);
 		QCAR::Matrix44F modelViewMatrix = QCAR::Tool::convertPose2GLMatrix(trackable->getPose());
+        SampleUtils::translatePoseMatrix(0.0f, 0.0f, kObjectScale,
+                                         &modelViewMatrix.data[0]);
+        SampleUtils::scalePoseMatrix(kObjectScale, kObjectScale, kObjectScale,
+                                     &modelViewMatrix.data[0]);
 
 		// We need to allocate the data on the heap
 		float* data = new float[16];

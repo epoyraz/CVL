@@ -14,6 +14,8 @@
 #include <QCAR/Frame.h>
 #include <QCAR/Renderer.h>
 
+#include "SampleUtils.h"
+
 using namespace cv;
 using namespace std;
 

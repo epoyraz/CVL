@@ -92,32 +92,33 @@ void main() \
 	texC.y = 0.5*texC.y + 0.5;\
     vec4 backColor = uBackCoord;\
 \
-	vec3 dir = backColor.rgb - frontColor.rgb;\
-	vec4 vpos = frontColor;\
+	vec3 dir = frontColor.rgb - backColor.rgb;\
 \
 	float cont = 0.0;\
 	vec3 Step = dir/steps;\
 \
-\
-	vec4 accum = vec4(0, 0, 0, 0);\
-	vec4 sample = vec4(0.0, 0.0, 0.0, 0.0);\
-	vec4 value = vec4(0, 0, 0, 0);\
-\
 	float opacityFactor = 8.0;\
 	float lightFactor = 1.3;\
+\
+	vec4 sample = vec4(0.0, 0.0, 0.0, opacityFactor * (1.0/steps));\
+	vec4 value = vec4(0, 0, 0, 0);\
+\
+	vec4 accum = vec4(0, 0, 0, 0);\
+	vec4 vpos = frontColor;\
 	for(float i=0.0;i<steps;i+=1.0)\
 	{\
 		vec2 tf_pos;\
 		tf_pos.x = getVolumeValue(vpos.xyz);\
 		value = vec4(tf_pos.x);\
-		sample.a = value.a * opacityFactor * (1.0/steps);\
+\
 		sample.rgb = value.rgb * sample.a * lightFactor;\
 		accum.rgb += (1.0 - accum.a) * sample.rgb;\
 		accum.a += sample.a;\
-		/*vpos.xyz += Step;\
+		//vpos.xyz = vpos.xyz + Step.xyz;\
 		/*if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
 		    break;*/\
 	}\
+    /*accum.a *= 0.8;*/\
 	gl_FragColor = accum;\
 } \
 ";
