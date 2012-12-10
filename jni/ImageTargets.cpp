@@ -319,6 +319,8 @@ Java_edu_ethz_s3d_S3D_onQCARInitializedNative(JNIEnv *, jobject)
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 {
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
     // Would be too verbose: LOG("Java_edu_ethz_S3D_GLRenderer_renderFrame");
     // Clear color and depth buffer 
@@ -456,6 +458,8 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 #endif
 
     QCAR::Renderer::getInstance().end();
+
+    glDisable(GL_BLEND);
 }
 
 
