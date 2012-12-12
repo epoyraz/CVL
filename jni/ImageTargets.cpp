@@ -44,9 +44,6 @@
 #include "SampleUtils.h"
 #include "Texture.h"
 #include "CubeShaders.h"
-#include "SimpleFragmentShader.h"
-#include "SimpleVertexShader.h"
-#include "RaycastVertexShader.h"
 #include "Teapot.h"
 
 #ifdef __cplusplus
