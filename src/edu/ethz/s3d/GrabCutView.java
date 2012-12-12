@@ -49,6 +49,34 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	int hSupplement;
 	int wSupplement;
 
+	
+	public GrabCutView(Context context) {
+		super(context);
+		
+				
+		//scale on RelativeLayout
+		setAdjustViewBounds(true);
+		setScaleType(ScaleType.CENTER_CROP);
+        setOnTouchListener(this);
+        
+        // Initialize drawing stuff
+        fgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
+        bgdStrokes = new LinkedList<LinkedList<MotionEvent.PointerCoords>>();
+        fgdColor.setColor(Color.BLUE);
+        fgdColor.setStrokeWidth(5);
+        bgdColor.setColor(Color.GREEN);
+        bgdColor.setStrokeWidth(5);
+        initRectColor.setColor(Color.RED);
+        initRectColor.setStrokeWidth(5);
+        initRectColor.setStyle(Style.STROKE);
+        
+        // Initialize Image
+        initRect = new Rect();
+		grabFrame();
+		setScaleType(ScaleType.CENTER_CROP);
+        updateFrame();
+	}	
+	
 	public GrabCutView(Context context, RelativeLayout layoutView) {
 		super(context);
 		
@@ -76,6 +104,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		setScaleType(ScaleType.CENTER_CROP);
         updateFrame();
 	}
+	
 	
 	private void calculateScale() {
         int width = getWidth();
@@ -175,7 +204,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
     			MotionEvent.PointerCoords coord = innerIter.next();
     			float distX = coord.x - last.x;
     			float distY = coord.y - last.y;
-    			int dist = (int) Math.floor(FloatMath.sqrt(distX*distX + distY*distY)/scale);
+    			int dist = (int) FloatMath.floor(FloatMath.sqrt(distX*distX + distY*distY)/scale);
     			distX /= dist;
     			distY /= dist;
     			// Insert all points on the line
