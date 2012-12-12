@@ -24,6 +24,8 @@ using namespace std;
 #define LOG_TAG "GrabCut"
 #endif
 
+#ifndef GRABCUT_H
+#define GRABCUT_H
 class GrabCut {
 public:
 	GrabCut();
@@ -61,3 +63,5 @@ private:
 	Mat bgdModel, fgdModel;
 	Rect rect;
 };
+
+#endif
