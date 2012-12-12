@@ -49,7 +49,7 @@ varying vec4 normal; \
 varying vec4 frontColor;\
 varying vec4 pos;\
 \
-uniform sampler2D texSampler2D; \
+uniform sampler2D uVolData; \
 \
 uniform vec3 eyePos;\
 \
@@ -82,7 +82,7 @@ float getVolumeValue(vec3 volpos)\
 	texpos2.x = dx2+(volpos.x/slicesOverX);\
 	texpos2.y = dy2+(volpos.y/slicesOverY);\
 \
-	return texture2D(texSampler2D,texpos1).r;\
+	return mix( texture2D(uVolData,texpos1).x, texture2D(uVolData,texpos2).x, (volpos.z*numberOfSlices)-s1);\
 }\
 \
 void main() \
