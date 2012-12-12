@@ -51,7 +51,7 @@ varying vec4 pos;\
 \
 uniform sampler2D texSampler2D; \
 \
-uniform vec4 uBackCoord;\
+uniform vec3 eyePos;\
 \
 const float steps = 50.0;\
 const float numberOfSlices = 10.0;\
@@ -87,12 +87,8 @@ float getVolumeValue(vec3 volpos)\
 \
 void main() \
 { \
-    vec2 texC = pos.xy/pos.w;\
-	texC.x = 0.5*texC.x + 0.5;\
-	texC.y = 0.5*texC.y + 0.5;\
-    vec4 backColor = uBackCoord;\
-\
-	vec3 dir = frontColor.rgb - backColor.rgb;\
+	vec3 dir = frontColor.rgb - eyePos.rgb;\
+    dir *= 1.74 / length(dir);\
 \
 	float cont = 0.0;\
 	vec3 Step = dir/steps;\
@@ -114,11 +110,11 @@ void main() \
 		sample.rgb = value.rgb * sample.a * lightFactor;\
 		accum.rgb += (1.0 - accum.a) * sample.rgb;\
 		accum.a += sample.a;\
-		/*vpos.xyz = vpos.xyz + Step.xyz;\
-		/*if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
-		    break;*/\
+		vpos.xyz = vpos.xyz + Step.xyz;\
+		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
+		    break;\
 	}\
-    /*accum.a *= 0.8;*/\
+    accum.a *= 0.8;\
 	gl_FragColor = accum;\
 } \
 ";

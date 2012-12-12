@@ -424,7 +424,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         }
         LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
 
-        glUniform3fv(glGetUniformLocation(shaderProgramID, "uBackCoord"),3,(const GLfloat*) &cameraPosition.data[0]);
+        glUniform3fv(glGetUniformLocation(shaderProgramID, "eyePos"), 1, (const GLfloat*) &cameraPosition.data[0]);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texId);
