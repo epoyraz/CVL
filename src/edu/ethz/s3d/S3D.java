@@ -106,10 +106,11 @@ public class S3D extends Activity {
 	public void startGrabCutView() {
 		RelativeLayout rl = new RelativeLayout(this);
 		
-		mReconstruction = new Reconstruction(10, 10, 10);
-		
 		mGlView.onPause();
 		mGrabView = new GrabCutView(this, rl);
+
+		// This has to be after the GrabCut Initialization since it needs the width and height.
+		mReconstruction = new Reconstruction(10, 10, 10);
 
 		LayoutParams lpImageView = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		rl.addView(mGrabView, lpImageView);

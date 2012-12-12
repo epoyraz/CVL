@@ -25,12 +25,12 @@ using namespace std;
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #ifndef LOG_TAG
-#define LOG_TAG "GrabCut"
+#define LOG_TAG "Reconstruction"
 #endif
 
 class Reconstruction {
 public:
-	Reconstruction(int x = 10, int y = 10, int z = 10);
+	Reconstruction(int width, int height, int x = 10, int y = 10, int z = 10);
 	~Reconstruction();
 	unsigned int getTexture();
 	void addSilhouette(Mat* silhouette, Mat* mvMatrix);
@@ -46,6 +46,7 @@ private:
 	int x, y, z;
 	int width, height;
 	int nWidth, nHeight;
+	int imgWidth, imgHeight;
 };
 
 

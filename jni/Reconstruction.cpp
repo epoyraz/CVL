@@ -8,8 +8,8 @@
 #include "Reconstruction.h"
 
 
-Reconstruction::Reconstruction(int x_in, int y_in, int z_in) :
-	x(x_in), y(y_in), z(z_in) {
+Reconstruction::Reconstruction(int width_in, int height_in, int x_in, int y_in, int z_in) :
+	x(x_in), y(y_in), z(z_in), imgWidth(width_in), imgHeight(height_in) {
 	LOG("Allocating Voxels. x: %d , y: %d , z: %d ", x, y, z);
 	//TODO: Use the following lines again:
 	//voxels = new bool[x * y * z];
@@ -100,19 +100,21 @@ unsigned int Reconstruction::getTexture() {
 void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 	float xMinus = (x-1.f)/2;
 	float yMinus = (y-1.f)/2;
+	float heightDiv = imgHeight/2;
+	float widthDiv = imgWidth/2;
 	Mat projMat = (*cameraMatrix) * (*mvMatrix);
-	LOG("Mult Projection Mat:");
-	LOG(" %f %f %f %f", projMat.at<float>(0,0), projMat.at<float>(0,1), projMat.at<float>(0,2), projMat.at<float>(0,3));
-	LOG(" %f %f %f %f", projMat.at<float>(1,0), projMat.at<float>(1,1), projMat.at<float>(1,2), projMat.at<float>(1,3));
-	LOG(" %f %f %f %f", projMat.at<float>(2,0), projMat.at<float>(2,1), projMat.at<float>(2,2), projMat.at<float>(2,3));
-	LOG(" %f %f %f %f", projMat.at<float>(3,0), projMat.at<float>(3,1), projMat.at<float>(3,2), projMat.at<float>(3,3));
+	LOG("ModelViewProjection Mat1: %f %f %f %f", projMat.at<float>(0,0), projMat.at<float>(0,1), projMat.at<float>(0,2), projMat.at<float>(0,3));
+	LOG("ModelViewProjection Mat2: %f %f %f %f", projMat.at<float>(1,0), projMat.at<float>(1,1), projMat.at<float>(1,2), projMat.at<float>(1,3));
+	LOG("ModelViewProjection Mat3: %f %f %f %f", projMat.at<float>(2,0), projMat.at<float>(2,1), projMat.at<float>(2,2), projMat.at<float>(2,3));
+	LOG("ModelViewProjection Mat4: %f %f %f %f", projMat.at<float>(3,0), projMat.at<float>(3,1), projMat.at<float>(3,2), projMat.at<float>(3,3));
+	LOG("Width: %d, %f; Height: %d, %f", imgWidth, widthDiv, imgHeight, heightDiv);
 	// Iterate through all voxels
 	LOG("Iterating through Voxels.");
 	LOG("Voxel nums. x: %d , y: %d , z: %d ", x, y, z);
 	int count = 0;
 	int countProj = 0;
 	int countUnset = 0;
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < x; i++) {
 		for (int j = 0; j < y; j++) {
 			for (int k = 0; k < z; k++) {
 				count++;
@@ -121,14 +123,14 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 					Mat currVoxel(4,1, CV_32FC1, values);
 					Mat proj = projMat * currVoxel;
 					// Look at the position we projected to in the mask
-					char mask = silhouette->at<char>(round(proj.at<float>(0,0)), round(proj.at<float>(1,0)));
+					char mask = silhouette->at<char>(round(proj.at<float>(0,0) + heightDiv), round(proj.at<float>(1,0) + widthDiv));
 					if (mask == GC_BGD || mask == GC_PR_BGD ) {
-						LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0), proj.at<float>(1,0), proj.at<float>(2,0));
+						LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 						countUnset++;
 						voxels[i + j*x + k*y*x] = false;
 					}
 					else {
-						LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0), proj.at<float>(1,0), proj.at<float>(2,0));
+						LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 					}
 					countProj++;
 				}

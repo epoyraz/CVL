@@ -21,7 +21,10 @@ extern "C"
 		if (reconstructionHandler != NULL)
 			delete reconstructionHandler;
 
-		reconstructionHandler = new Reconstruction(x, y, z);
+		int width = grabCutObject->getWidth();
+		int height = grabCutObject->getHeight();
+
+		reconstructionHandler = new Reconstruction(width, height, x, y, z);
 	}
 
 	JNIEXPORT void JNICALL Java_edu_ethz_s3d_Reconstruction_refineWithLatestCut(JNIEnv* env, jobject)

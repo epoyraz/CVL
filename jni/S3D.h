@@ -11,7 +11,9 @@
 
 #include "SilhouetteStorage.h"
 #include "Reconstruction.h"
+#include "GrabCut.h"
 
+extern GrabCut* grabCutObject;
 extern SilhouetteStorage* sStorage;
 extern Reconstruction* reconstructionHandler;
 
