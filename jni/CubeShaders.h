@@ -114,7 +114,7 @@ void main() \
 		sample.rgb = value.rgb * sample.a * lightFactor;\
 		accum.rgb += (1.0 - accum.a) * sample.rgb;\
 		accum.a += sample.a;\
-		//vpos.xyz = vpos.xyz + Step.xyz;\
+		/*vpos.xyz = vpos.xyz + Step.xyz;\
 		/*if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
 		    break;*/\
 	}\
