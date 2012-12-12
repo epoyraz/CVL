@@ -31,8 +31,8 @@ uniform mat4 modelViewProjectionMatrix; \
  \
 void main() \
 { \
-   pos = modelViewProjectionMatrix * vertexPosition; \
-   gl_Position = pos;\
+   pos = vertexPosition; \
+   gl_Position = modelViewProjectionMatrix * vertexPosition;\
    normal = vertexNormal; \
    frontColor = aVertexColor;\
 } \
@@ -87,33 +87,33 @@ float getVolumeValue(vec3 volpos)\
 \
 void main() \
 { \
-	vec3 dir = frontColor.rgb - eyePos.rgb;\
+	vec3 dir = pos.rgb - eyePos.rgb;\
     dir *= 1.74 / length(dir);\
 \
-	float cont = 0.0;\
 	vec3 Step = dir/steps;\
 \
 	float opacityFactor = 8.0;\
 	float lightFactor = 1.3;\
 \
-	vec4 sample = vec4(0.0, 0.0, 0.0, opacityFactor * (1.0/steps));\
+	vec4 sample = vec4(0.0, 0.0, 0.0, opacityFactor / steps);\
 	vec4 value = vec4(0, 0, 0, 0);\
 \
 	vec4 accum = vec4(0, 0, 0, 0);\
 	vec4 vpos = frontColor;\
 	for(float i=0.0;i<steps;i+=1.0)\
 	{\
-		vec2 tf_pos;\
-		tf_pos.x = getVolumeValue(vpos.xyz);\
-		value = vec4(tf_pos.x);\
+		float tex = getVolumeValue(vpos.xyz);\
+        if (tex > 0.5) {\
+            accum = vec4(1,1,1,1);\
+		    break;\
+        }\
 \
-		sample.rgb = value.rgb * sample.a * lightFactor;\
-		accum.rgb += (1.0 - accum.a) * sample.rgb;\
-		accum.a += sample.a;\
-		vpos.xyz = vpos.xyz + Step.xyz;\
-		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a>=1.0)\
+		vpos.xyz += Step.zyx;\
+		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a >=1.0 || \
+		     vpos.x < 0.0 || vpos.y < 0.0 || vpos.z < 0.0)\
 		    break;\
 	}\
+\
     accum.a *= 0.8;\
 	gl_FragColor = accum;\
 } \

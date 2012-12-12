@@ -429,7 +429,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         GLint loc = glGetUniformLocation(shaderProgramID, "uVolData");
         LOG("location of VolumeData : %d",loc);
 
-        glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), texId);
+        glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), 0);
 
 
         glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE,
@@ -737,8 +737,10 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
 
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	char texData[16] = {(char)255};
 
