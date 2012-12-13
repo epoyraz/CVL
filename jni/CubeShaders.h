@@ -54,9 +54,9 @@ uniform sampler2D uVolData; \
 uniform vec3 eyePos;\
 \
 const float steps = 50.0;\
-const float numberOfSlices = 10.0;\
-const float slicesOverX = 10.0;\
-const float slicesOverY = 10.0;\
+const float numberOfSlices = 2.0;\
+const float slicesOverX = 2.0;\
+const float slicesOverY = 1.0;\
 \
 \
 float getVolumeValue(vec3 volpos)\
@@ -65,24 +65,18 @@ float getVolumeValue(vec3 volpos)\
 	float dx1,dy1;\
 	float dx2,dy2;\
 \
-	vec2 texpos1,texpos2;\
+	vec2 texpos1;\
 \
 	s1 = floor(volpos.z*numberOfSlices);\
-	s2 = s1+1.0;\
 \
 	dx1 = fract(s1/slicesOverX);\
-	dy1 = floor(s1/slicesOverY)/slicesOverY;\
-\
-	dx2 = fract(s2/slicesOverX);\
-	dy2 = floor(s2/slicesOverY)/slicesOverY;\
+	dy1 = floor(s1/slicesOverX)/slicesOverY;\
 \
 	texpos1.x = dx1+(volpos.x/slicesOverX);\
 	texpos1.y = dy1+(volpos.y/slicesOverY);\
 \
-	texpos2.x = dx2+(volpos.x/slicesOverX);\
-	texpos2.y = dy2+(volpos.y/slicesOverY);\
-\
-	return mix( texture2D(uVolData,texpos1).x, texture2D(uVolData,texpos2).x, (volpos.z*numberOfSlices)-s1);\
+	/*return mix( texture2D(uVolData,texpos1).x, texture2D(uVolData,texpos2).x, (volpos.z*numberOfSlices)-s1);*/\
+    return texture2D(uVolData, texpos1).x;\
 }\
 \
 void main() \
@@ -102,8 +96,8 @@ void main() \
 	vec4 vpos = frontColor;\
 	for(float i=0.0;i<steps;i+=1.0)\
 	{\
-		float tex = getVolumeValue(vpos.xyz);\
-        if (tex > 0.5) {\
+		float tex = getVolumeValue(vpos.zyx);\
+        if (tex > 0.1) {\
             accum = vec4(1,1,1,1);\
 		    break;\
         }\

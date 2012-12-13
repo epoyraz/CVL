@@ -742,10 +742,11 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	char texData[16] = {(char)255};
+	char texData[32] = {(char)255};
+	memset(texData, (char)255, 32);
 
 	// (2D, level 0, internal format, width, height, no border, format, pixel format, data
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
 #ifndef USE_OPENGL_ES_1_1
   
     shaderProgramID     = SampleUtils::createProgramFromBuffer(cubeMeshVertexShader,
