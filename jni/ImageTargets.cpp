@@ -418,6 +418,14 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         if (reconstructionHandler != NULL) {
         	 glDeleteTextures(1, &texId);
         	 texId = reconstructionHandler->getTexture();
+             float slices[2] = { reconstructionHandler->getOverX(), reconstructionHandler->getOVerY() };
+             glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
+             glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), reconstructionHandler->getNSlices());
+        }
+        else {
+            float slices[2] = { 2.f, 1.f };
+            glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
+            glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), 2);
         }
         LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
 

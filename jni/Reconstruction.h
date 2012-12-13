@@ -34,6 +34,9 @@ public:
 	~Reconstruction();
 	unsigned int getTexture();
 	void addSilhouette(Mat* silhouette, Mat* mvMatrix);
+	float getOverX();
+	float getOVerY();
+	float getNSlices();
 
 private:
 	void calculateSizes();

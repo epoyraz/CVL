@@ -12,11 +12,8 @@ Reconstruction::Reconstruction(int width_in, int height_in, int x_in, int y_in, 
 	x(x_in), y(y_in), z(z_in), imgWidth(width_in), imgHeight(height_in) {
 	LOG("Allocating Voxels. x: %d , y: %d , z: %d ", x, y, z);
 	//TODO: Use the following lines again:
-	//voxels = new bool[x * y * z];
-	//memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
-	voxels = new bool[x * y * 100];
-	//memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
-	memset(voxels, (unsigned char)255, x*y*100*sizeof(bool));
+	voxels = new bool[x * y * z];
+	memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
 	LOG("All voxels set true.");
 
 	calculateSizes();
@@ -56,9 +53,7 @@ void Reconstruction::calculateSizes() {
 	// Calculate how many pixels we need
 	int prod = x * y * z;
 	// Calculate the square root to get the best distribution on both axis
-	//TODO: Use the following line again:
-	//width = ceil(sqrt((float)prod));
-	width = 100;
+	width = ceil(sqrt((float)prod));
 	// Get the number of images in first direction (makes the first dimension larger)
 	nWidth = ceil((float)width/(float)x);
 	// Calculate the number of images in second direction
@@ -107,10 +102,9 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 	LOG("ModelViewProjection Mat2: %f %f %f %f", projMat.at<float>(1,0), projMat.at<float>(1,1), projMat.at<float>(1,2), projMat.at<float>(1,3));
 	LOG("ModelViewProjection Mat3: %f %f %f %f", projMat.at<float>(2,0), projMat.at<float>(2,1), projMat.at<float>(2,2), projMat.at<float>(2,3));
 	LOG("ModelViewProjection Mat4: %f %f %f %f", projMat.at<float>(3,0), projMat.at<float>(3,1), projMat.at<float>(3,2), projMat.at<float>(3,3));
-	LOG("Width: %d, %f; Height: %d, %f", imgWidth, widthDiv, imgHeight, heightDiv);
 	// Iterate through all voxels
 	LOG("Iterating through Voxels.");
-	LOG("Voxel nums. x: %d , y: %d , z: %d ", x, y, z);
+	//LOG("Voxel nums. x: %d , y: %d , z: %d ", x, y, z);
 	int count = 0;
 	int countProj = 0;
 	int countUnset = 0;
@@ -125,12 +119,12 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 					// Look at the position we projected to in the mask
 					char mask = silhouette->at<char>(round(proj.at<float>(0,0) + heightDiv), round(proj.at<float>(1,0) + widthDiv));
 					if (mask == GC_BGD || mask == GC_PR_BGD ) {
-						LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
+						//LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 						countUnset++;
 						voxels[i + j*x + k*y*x] = false;
 					}
 					else {
-						LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
+						//LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 					}
 					countProj++;
 				}
@@ -153,4 +147,16 @@ void Reconstruction::setAt(int posX, int posY, int posZ, char value) {
 	voxe->imageData[4*(imgX * voxe->width + imgY)+1] = value;
 	voxe->imageData[4*(imgX * voxe->width + imgY)+2] = value;
 	voxe->imageData[4*(imgX * voxe->width + imgY)+3] = value;
+}
+
+float Reconstruction::getOverX() {
+	return (float)nWidth;
+}
+
+float Reconstruction::getOVerY() {
+	return (float)nHeight;
+}
+
+float Reconstruction::getNSlices() {
+	return (float)z;
 }

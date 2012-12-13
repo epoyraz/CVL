@@ -50,13 +50,11 @@ varying vec4 frontColor;\
 varying vec4 pos;\
 \
 uniform sampler2D uVolData; \
-\
 uniform vec3 eyePos;\
+uniform vec2 slicesOver;\
+uniform float numberOfSlices;\
 \
 const float steps = 50.0;\
-const float numberOfSlices = 2.0;\
-const float slicesOverX = 2.0;\
-const float slicesOverY = 1.0;\
 \
 \
 float getVolumeValue(vec3 volpos)\
@@ -69,11 +67,11 @@ float getVolumeValue(vec3 volpos)\
 \
 	s1 = floor(volpos.z*numberOfSlices);\
 \
-	dx1 = fract(s1/slicesOverX);\
-	dy1 = floor(s1/slicesOverX)/slicesOverY;\
+	dx1 = fract(s1/slicesOver.x);\
+	dy1 = floor(s1/slicesOver.x)/slicesOver.y;\
 \
-	texpos1.x = dx1+(volpos.x/slicesOverX);\
-	texpos1.y = dy1+(volpos.y/slicesOverY);\
+	texpos1.x = dx1+(volpos.x/slicesOver.x);\
+	texpos1.y = dy1+(volpos.y/slicesOver.y);\
 \
 	/*return mix( texture2D(uVolData,texpos1).x, texture2D(uVolData,texpos2).x, (volpos.z*numberOfSlices)-s1);*/\
     return texture2D(uVolData, texpos1).x;\
