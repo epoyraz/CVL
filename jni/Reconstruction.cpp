@@ -113,7 +113,7 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 			for (int k = 0; k < z; k++) {
 				count++;
 				if (voxels[i + j*x + k*y*x]) {
-					float values[4] = {i-xMinus, j-yMinus, k, 1};
+					float values[4] = {5*(i-xMinus), 5*(j-yMinus), 5*k, 1};
 					Mat currVoxel(4,1, CV_32FC1, values);
 					Mat proj = projMat * currVoxel;
 					// Look at the position we projected to in the mask
