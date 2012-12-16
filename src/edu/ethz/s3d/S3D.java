@@ -50,7 +50,7 @@ public class S3D extends Activity {
 	private GrabCutView mGrabView;
 	
 	// Our Reconstruction:
-	private Reconstruction mReconstruction;
+	private Reconstruction mReconstruction = null;
 
 	// The view to display the sample splash screen:
 	private ImageView mSplashScreenView;
@@ -109,7 +109,8 @@ public class S3D extends Activity {
 		mGrabView = new GrabCutView(this, rl);
 
 		// This has to be after the GrabCut Initialization since it needs the width and height.
-		mReconstruction = new Reconstruction(10, 10, 10);
+		if (mReconstruction == null)
+			mReconstruction = new Reconstruction(10, 10, 10);
 
 		LayoutParams lpImageView = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		rl.addView(mGrabView, lpImageView);
