@@ -11,7 +11,6 @@
 Reconstruction::Reconstruction(int width_in, int height_in, int x_in, int y_in, int z_in) :
 	x(x_in), y(y_in), z(z_in), imgWidth(width_in), imgHeight(height_in) {
 	LOG("Allocating Voxels. x: %d , y: %d , z: %d ", x, y, z);
-	//TODO: Use the following lines again:
 	voxels = new bool[x * y * z];
 	memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
 	LOG("All voxels set true.");
@@ -56,6 +55,7 @@ void Reconstruction::calculateSizes() {
 	width = ceil(sqrt((float)prod));
 	// Get the number of images in first direction (makes the first dimension larger)
 	nWidth = ceil((float)width/(float)x);
+	width = nWidth * x;
 	// Calculate the number of images in second direction
 	nHeight = ceil((float)z/(float)nWidth);
 	// Calculate height of texture
@@ -76,8 +76,8 @@ unsigned int Reconstruction::getTexture() {
 	glBindTexture(GL_TEXTURE_2D, texId);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 
 	IplImage* texValues = cvCreateImage(cvSize(1024, 1024) , IPL_DEPTH_8U, 4);
@@ -122,6 +122,14 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 						//LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 						countUnset++;
 						voxels[i + j*x + k*y*x] = false;
+
+						int locationX = k%nWidth * x + i;
+						int locationY = k/nWidth * y + j;
+						int location = (locationX + locationY * x * nWidth)*4;
+						voxe->imageData[location] = (char)0;
+						voxe->imageData[location+1] = (char)0;
+						voxe->imageData[location+2] = (char)0;
+						voxe->imageData[location+3] = (char)0;
 					}
 					else {
 						//LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
