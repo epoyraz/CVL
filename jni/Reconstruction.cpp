@@ -117,7 +117,7 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 					Mat currVoxel(4,1, CV_32FC1, values);
 					Mat proj = projMat * currVoxel;
 					// Look at the position we projected to in the mask
-					char mask = silhouette->at<char>(round(proj.at<float>(0,0) + heightDiv), round(proj.at<float>(1,0) + widthDiv));
+					char mask = silhouette->at<char>(round(proj.at<float>(1,0) + heightDiv), round(proj.at<float>(0,0) + widthDiv));
 					if (mask == GC_BGD || mask == GC_PR_BGD ) {
 						//LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 						countUnset++;
