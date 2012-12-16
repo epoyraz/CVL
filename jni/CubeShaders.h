@@ -92,10 +92,11 @@ void main() \
 \
 	vec4 accum = vec4(0, 0, 0, 0);\
 	vec4 vpos = frontColor;\
+    vpos.x *= 0.99;\
 	for(float i=0.0;i<steps;i+=1.0)\
 	{\
 		float tex = getVolumeValue(vpos.zyx);\
-        if (tex > 0.1) {\
+        if (tex > 0.9) {\
             accum = vec4(1,1,1,1);\
 		    break;\
         }\
