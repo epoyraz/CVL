@@ -93,18 +93,15 @@ unsigned int Reconstruction::getTexture() {
 }
 
 void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
+	// Precompute stuff
 	float xMinus = (x-1.f)/2;
 	float yMinus = (y-1.f)/2;
 	float heightDiv = imgHeight/2;
 	float widthDiv = imgWidth/2;
 	Mat projMat = (*cameraMatrix) * (*mvMatrix);
-	LOG("ModelViewProjection Mat1: %f %f %f %f", projMat.at<float>(0,0), projMat.at<float>(0,1), projMat.at<float>(0,2), projMat.at<float>(0,3));
-	LOG("ModelViewProjection Mat2: %f %f %f %f", projMat.at<float>(1,0), projMat.at<float>(1,1), projMat.at<float>(1,2), projMat.at<float>(1,3));
-	LOG("ModelViewProjection Mat3: %f %f %f %f", projMat.at<float>(2,0), projMat.at<float>(2,1), projMat.at<float>(2,2), projMat.at<float>(2,3));
-	LOG("ModelViewProjection Mat4: %f %f %f %f", projMat.at<float>(3,0), projMat.at<float>(3,1), projMat.at<float>(3,2), projMat.at<float>(3,3));
+
 	// Iterate through all voxels
 	LOG("Iterating through Voxels.");
-	//LOG("Voxel nums. x: %d , y: %d , z: %d ", x, y, z);
 	int count = 0;
 	int countProj = 0;
 	int countUnset = 0;
@@ -113,16 +110,27 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 			for (int k = 0; k < z; k++) {
 				count++;
 				if (voxels[i + j*x + k*y*x]) {
-					float values[4] = {5*(i-xMinus), 5*(j-yMinus), 5*k, 1};
+					// Project the current voxel into screen coordinates
+					float values[4] = {0.5*(i-xMinus), 0.5*(j-yMinus), 0.5*k, 1};
 					Mat currVoxel(4,1, CV_32FC1, values);
 					Mat proj = projMat * currVoxel;
+
 					// Look at the position we projected to in the mask
-					char mask = silhouette->at<char>(round(proj.at<float>(1,0) + heightDiv), round(proj.at<float>(0,0) + widthDiv));
+					// This includes clipping to image size
+					//LOG("%d: x %f y %f z %f ", k + j*z + i*y*z, proj.at<float>(1,0), proj.at<float>(0,0), proj.at<float>(2,0));
+					int xCoord = round(proj.at<float>(1,0) + heightDiv);
+					int yCoord = round(proj.at<float>(0,0) + widthDiv);
+					char mask = (char)0;
+					if (xCoord >= 0 && xCoord < imgHeight && yCoord >= 0 && yCoord < imgWidth)
+						mask = silhouette->at<char>(xCoord, yCoord);
+
+					// If the voxel belongs to the background, unset it.
 					if (mask == GC_BGD || mask == GC_PR_BGD ) {
-						//LOG("Processed Voxel %d : Values %f, %f, %fb; projected to %f, %f, %f - unset", k + j*x + i*y*x, values[0], values[1], values[2], proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
+						// Unset it in the boolean array
 						countUnset++;
 						voxels[i + j*x + k*y*x] = false;
 
+						// Unset it in the texture
 						int locationX = k%nWidth * x + i;
 						int locationY = k/nWidth * y + j;
 						int location = (locationX + locationY * x * nWidth)*4;
@@ -130,9 +138,6 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 						voxe->imageData[location+1] = (char)0;
 						voxe->imageData[location+2] = (char)0;
 						voxe->imageData[location+3] = (char)0;
-					}
-					else {
-						//LOG("Processed Voxel %d : projected to %f, %f, %f - set", k + j*x + i*y*x, proj.at<float>(0,0) + heightDiv, proj.at<float>(1,0) + widthDiv, proj.at<float>(2,0));
 					}
 					countProj++;
 				}
