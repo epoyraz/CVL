@@ -92,9 +92,13 @@ void main() \
 \
 	vec4 accum = vec4(0, 0, 0, 0);\
 	vec4 vpos = frontColor;\
-    vpos.x *= 0.99;\
+    vpos *= 0.99;\
 	for(float i=0.0;i<steps;i+=1.0)\
 	{\
+		if(vpos.x > 0.99 || vpos.y > 0.99 || vpos.z > 0.99 || accum.a >=1.0 || \
+		     vpos.x < 0.0 || vpos.y < 0.0 || vpos.z < 0.0)\
+		    break;\
+\
 		float tex = getVolumeValue(vpos.zyx);\
         if (tex > 0.9) {\
             accum = vec4(1,1,1,1);\
@@ -102,9 +106,6 @@ void main() \
         }\
 \
 		vpos.xyz += Step.zyx;\
-		if(vpos.x > 1.0 || vpos.y > 1.0 || vpos.z > 1.0 || accum.a >=1.0 || \
-		     vpos.x < 0.0 || vpos.y < 0.0 || vpos.z < 0.0)\
-		    break;\
 	}\
 \
     accum.a *= 0.8;\
