@@ -365,8 +365,8 @@ public class S3D extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// Set the splash screen image to display during initialization:
-		// TODO: mSplashScreenImageResource =
-		// R.drawable.splash_screen_image_targets;
+		// TODO: 
+		mSplashScreenImageResource = R.drawable.splash_screen;
 
 		DebugLog.LOGI("Trying to load OpenCV library");
 		if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_2, this,
