@@ -70,7 +70,7 @@ Reconstruction::~Reconstruction() {
 }
 
 unsigned int Reconstruction::getTexture() {
-	LOG("Starting texture loading");
+	//LOG("Starting texture loading");
 	unsigned int texId;
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
@@ -88,7 +88,7 @@ unsigned int Reconstruction::getTexture() {
 
 	cvReleaseImage(&texValues);
 
-	LOG("Finished texture loading");
+	//LOG("Finished texture loading");
 	return texId;
 }
 
@@ -114,11 +114,13 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 					float values[4] = {0.5*(i-xMinus), 0.5*(j-yMinus), 0.5*k, 1};
 					Mat currVoxel(4,1, CV_32FC1, values);
 					Mat proj = projMat * currVoxel;
+					proj.at<float>(0,0) *= 320 / proj.at<float>(2,0);
+					proj.at<float>(1,0) *= 240 / proj.at<float>(2,0);
 
 					// Look at the position we projected to in the mask
 					// This includes clipping to image size
 					//LOG("%d: x %f y %f z %f ", k + j*z + i*y*z, proj.at<float>(1,0), proj.at<float>(0,0), proj.at<float>(2,0));
-					int xCoord = round(proj.at<float>(1,0) + heightDiv);
+					int xCoord = round(-proj.at<float>(1,0) + heightDiv);
 					int yCoord = round(proj.at<float>(0,0) + widthDiv);
 					char mask = (char)0;
 					if (xCoord >= 0 && xCoord < imgHeight && yCoord >= 0 && yCoord < imgWidth)
