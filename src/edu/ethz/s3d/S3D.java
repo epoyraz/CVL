@@ -128,18 +128,23 @@ public class S3D extends Activity {
 		LayoutParams lpFgd = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		LayoutParams lpBgd = new LayoutParams(lpFgd);
 		LayoutParams lpDone = new LayoutParams(lpFgd);
-		
-		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		LayoutParams lpReject = new LayoutParams(lpFgd);
+
 		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
 		lpBgd.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lpBgd.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
 		lpDone.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lpDone.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+		lpReject.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		lpReject.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 		// Create Buttons
 		Button doneButton = new Button(this);
+		Button rejectButton = new Button(this);
 		Button fgButton = new Button(this);
 		Button bgButton = new Button(this);
 	
@@ -147,7 +152,14 @@ public class S3D extends Activity {
 		doneButton.setText("Accept");
 		doneButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				finishedGrabCut();
+				finishedGrabCut(true);
+			}
+		});
+		
+		rejectButton.setText("Reject");
+		rejectButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				finishedGrabCut(false);
 			}
 		});
 
@@ -169,6 +181,7 @@ public class S3D extends Activity {
 		rl.addView(fgButton, lpFgd);
 		rl.addView(bgButton, lpBgd);
 		rl.addView(doneButton, lpDone);
+		rl.addView(rejectButton, lpReject);
 
 		// Define logic
 		fgButton.setEnabled(false);
@@ -176,14 +189,16 @@ public class S3D extends Activity {
 		doneButton.setEnabled(false);
 	}
 
-	public void finishedGrabCut() {
+	public void finishedGrabCut(boolean accept) {
 		mGlView.onResume();
 		setContentView(mGlView);
-		mGrabView.moveToStorage();
-		mGrabView = null;
-		DebugLog.LOGD("Stored Data and resumed Displaying");
-		mReconstruction.refineWithLatestCut();
-		DebugLog.LOGD("Refined 3D Reconstruction");
+		if (accept) {
+			mGrabView.moveToStorage();
+			mGrabView = null;
+			DebugLog.LOGD("Stored Data and resumed Displaying");
+			mReconstruction.refineWithLatestCut();
+			DebugLog.LOGD("Refined 3D Reconstruction");
+		}
 	}
 
 	/** An async task to initialize QCAR asynchronously. */

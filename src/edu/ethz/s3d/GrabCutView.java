@@ -287,6 +287,8 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		button.setEnabled(false);
 		button = (Button) parentLayout.getChildAt(3);
 		button.setEnabled(false);
+		button = (Button) parentLayout.getChildAt(4);
+		button.setEnabled(false);
 	}
 	
 	private void enableInput() {
@@ -297,6 +299,8 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		button = (Button) parentLayout.getChildAt(2);
 		button.setEnabled(true);
 		button = (Button) parentLayout.getChildAt(3);
+		button.setEnabled(true);
+		button = (Button) parentLayout.getChildAt(4);
 		button.setEnabled(true);
 	}
 
