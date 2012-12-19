@@ -101,7 +101,7 @@ void main() \
 \
 		float tex = getVolumeValue(vpos.zyx);\
         if (tex > 0.9) {\
-            accum = vec4(1,1,1,1);\
+            accum = vec4(1,1,1,1) * (steps-i)/steps;\
 		    break;\
         }\
 \
