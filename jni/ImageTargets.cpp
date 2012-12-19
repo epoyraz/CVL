@@ -137,6 +137,16 @@ Java_edu_ethz_s3d_S3D_getOpenGlEsVersionNative(JNIEnv *, jobject)
 #endif
 }
 
+// Just returns 1 for OpenGLEs 1.1 and 2 for other
+JNIEXPORT bool JNICALL
+Java_edu_ethz_s3d_S3D_hasTarget(JNIEnv *, jobject)
+{
+	// Get the state from QCAR and mark the beginning of a rendering section
+    QCAR::State state = QCAR::Renderer::getInstance().begin();
+
+    return (state.getNumActiveTrackables() > 0);
+}
+
 
 // Sets isActivityInPortraitMode to the argument value
 JNIEXPORT void JNICALL
@@ -398,7 +408,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
                                     &modelViewMatrix.data[0] ,
                                     &modelViewProjection.data[0]);
 
-        LOG("ModelView : X (%f), Y (%f), Z (%f)", modelViewMatrix.data[0], modelViewMatrix.data[1], modelViewMatrix.data[2]);
+        //LOG("ModelView : X (%f), Y (%f), Z (%f), W (%f)", 640*modelViewMatrix.data[12]/modelViewMatrix.data[14], 640*modelViewMatrix.data[13]/modelViewMatrix.data[14], modelViewMatrix.data[14]/modelViewMatrix.data[14], modelViewMatrix.data[15]);
         QCAR::Matrix44F inverseModelView = SampleMath::Matrix44FTranspose(SampleMath::Matrix44FInverse(modelViewMatrix));
         QCAR::Vec3F cameraPosition(inverseModelView.data[12], inverseModelView.data[13], inverseModelView.data[14]);
 
@@ -427,7 +437,6 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
             glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
             glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), 2);
         }
-        LOG("Camera Position : X (%f), Y (%f), Z (%f)", cameraPosition.data[0], cameraPosition.data[1], cameraPosition.data[2]);
 
         glUniform3fv(glGetUniformLocation(shaderProgramID, "eyePos"), 1, (const GLfloat*) &cameraPosition.data[0]);
 
@@ -435,7 +444,6 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
         glBindTexture(GL_TEXTURE_2D, texId);
 
         GLint loc = glGetUniformLocation(shaderProgramID, "uVolData");
-        LOG("location of VolumeData : %d",loc);
 
         glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), 0);
 

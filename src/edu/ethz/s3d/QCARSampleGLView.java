@@ -263,10 +263,9 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
         private int[] mValue = new int[1];
     }
     
-    protected native Mat getFrame();
-
     public boolean onTouch(View v, MotionEvent event) {
-    	mActivity.startGrabCutView();
+    	if (mActivity.hasTarget()) 
+    		mActivity.startGrabCutView();
     	return false;
     }
 }

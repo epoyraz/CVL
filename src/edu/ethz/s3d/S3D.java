@@ -445,6 +445,8 @@ public class S3D extends Activity {
 	public native int initTracker();
 
 	public native void deinitTracker();
+	
+	public native boolean hasTarget();
 
 	/** Native functions to load and destroy tracking data. */
 	public native int loadTrackerData();
