@@ -109,7 +109,9 @@ void main() \
 	}\
 \
     accum.a *= 0.8;\
-	gl_FragColor = accum;\
+	vec4 q = frontColor;\
+    q.a = accum.a;\
+	gl_FragColor = q ;\
 } \
 ";
 
