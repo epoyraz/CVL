@@ -129,6 +129,7 @@ public class S3D extends Activity {
 		LayoutParams lpBgd = new LayoutParams(lpFgd);
 		LayoutParams lpDone = new LayoutParams(lpFgd);
 		LayoutParams lpReject = new LayoutParams(lpFgd);
+		LayoutParams lpMask = new LayoutParams(lpFgd);
 
 		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lpFgd.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -141,10 +142,14 @@ public class S3D extends Activity {
 
 		lpReject.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		lpReject.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+		lpMask.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		lpMask.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 				
 		// Create Buttons
 		Button doneButton = new Button(this);
 		Button rejectButton = new Button(this);
+		Button maskButton = new Button(this);
 		Button fgButton = new Button(this);
 		Button bgButton = new Button(this);
 	
@@ -160,6 +165,13 @@ public class S3D extends Activity {
 		rejectButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				finishedGrabCut(false);
+			}
+		});
+		
+		maskButton.setText("Toggle Mask");
+		maskButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mGrabView.switchBitmaps();
 			}
 		});
 
@@ -182,11 +194,13 @@ public class S3D extends Activity {
 		rl.addView(bgButton, lpBgd);
 		rl.addView(doneButton, lpDone);
 		rl.addView(rejectButton, lpReject);
+		rl.addView(maskButton, lpMask);
 
 		// Define logic
 		fgButton.setEnabled(false);
 		bgButton.setEnabled(false);
 		doneButton.setEnabled(false);
+		maskButton.setEnabled(false);
 	}
 
 	public void finishedGrabCut(boolean accept) {

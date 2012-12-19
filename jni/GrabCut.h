@@ -43,7 +43,9 @@ public:
 	Mat* getMaskedImage();
 	// Returns the mask
 	Mat* getMask();
-	// Returns the mask
+	// Returns the mask for the Screen
+	Mat* getScreenMask();
+	// Returns the ModelView matrix
 	Mat* getMVMatrix();
 	// Unsets the models to split the image
 	void unsetModels();
@@ -59,7 +61,7 @@ private:
 	Mat getFrame();
 	Mat* getModelViewMat();
 	Mat* mvMat;
-	Mat frame, mask, lastMasked;
+	Mat frame, mask, screenMask, lastMasked;
 	Mat bgdModel, fgdModel;
 	Rect rect;
 };

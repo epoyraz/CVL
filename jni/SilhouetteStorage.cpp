@@ -13,10 +13,6 @@ SilhouetteStorage::SilhouetteStorage() {
 }
 
 SilhouetteStorage::~SilhouetteStorage() {
-	for (vector<Mat*>::iterator iter = silhouettes->begin(); iter != silhouettes->end(); iter++) {
-		delete (*iter)->data;
-		delete (*iter);
-	}
 	delete silhouettes;
 	for (vector<Mat*>::iterator iter = mvMatrices->begin(); iter != mvMatrices->end(); iter++) {
 		delete (*iter)->data;

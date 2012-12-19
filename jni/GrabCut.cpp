@@ -32,12 +32,14 @@ void GrabCut::executeGrabCut(int iterations) {
 	LOG("Executing GrabCut");
 	grabCut(frame, mask, rect, bgdModel, fgdModel, 1, GC_EVAL);
 	LOG("Executed GrabCut");
+	mask.copyTo(screenMask);
 	// Iterate through all pixels and set fore/background
 	for (int i = 0; i < frame.rows; i++) {
 		for (int j = 0; j < frame.cols; j++) {
 			// Extract pixel values
 			Vec3b frameV = frame.at<Vec3b>(i, j);
 			Vec3b lastMaskedV = lastMasked.at<Vec3b>(i, j);
+			char screen = screenMask.at<char>(i, j);
 			char maskV = mask.at<char>(i, j);
 
 			// Iterate through channels
@@ -46,15 +48,18 @@ void GrabCut::executeGrabCut(int iterations) {
 					case GC_FGD:
 					case GC_PR_FGD:
 						lastMaskedV[d] = frameV[d];
+						screen = (char)255;
 						break;
 					default:
 						lastMaskedV[d] = frameV[d] / 2;
+						screen = (char)0;
 						break;
 				}
 			}
 
 			// Save values back
 			lastMasked.at<Vec3b>(i, j) = lastMaskedV;
+			screenMask.at<char>(i, j) = screen;
 		}
 	}
 	LOG("Created Frame");
@@ -77,10 +82,11 @@ Mat* GrabCut::getMaskedImage() {
 }
 
 Mat* GrabCut::getMask() {
-	char* maskData = new char[mask.cols*mask.rows];
-	memcpy(maskData, mask.data, mask.cols*mask.rows*sizeof(char));
-	Mat* maskCopy = new Mat(mask.cols, mask.rows, CV_8UC3, maskData);
 	return &mask;
+}
+
+Mat* GrabCut::getScreenMask() {
+	return &screenMask;
 }
 
 Mat* GrabCut::getMVMatrix() {

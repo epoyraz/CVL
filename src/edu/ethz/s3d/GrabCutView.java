@@ -45,6 +45,10 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	private Paint fgdColor = new Paint();
 	private Paint bgdColor = new Paint();
 	
+	private Bitmap frameBit;
+	private Bitmap maskBit;
+	boolean showFrame = true;
+	
 	float scale;
 	int hSupplement;
 	int wSupplement;
@@ -261,6 +265,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
     }
 	
 	protected native void getMaskedFrame(long address);
+	protected native void getMask(long address);
 	protected native int getFrameHeight();
 	protected native int getFrameWidth();
 	protected native void grabFrame();
@@ -273,7 +278,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		frameWidth = getFrameWidth();
 		Mat frame = new Mat(frameHeight, frameWidth, CvType.CV_8UC4);
 		getMaskedFrame(frame.getNativeObjAddr());
-		Bitmap frameBit = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
+		frameBit = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(frame, frameBit);
 		setImageBitmap(frameBit);
 	}
@@ -289,6 +294,8 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		button.setEnabled(false);
 		button = (Button) parentLayout.getChildAt(4);
 		button.setEnabled(false);
+		button = (Button) parentLayout.getChildAt(5);
+		button.setEnabled(false);
 	}
 	
 	private void enableInput() {
@@ -302,6 +309,18 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 		button.setEnabled(true);
 		button = (Button) parentLayout.getChildAt(4);
 		button.setEnabled(true);
+		button = (Button) parentLayout.getChildAt(5);
+		button.setEnabled(true);
+		
+		Mat mask = new Mat(frameHeight, frameWidth, CvType.CV_8UC4);
+		getMask(mask.getNativeObjAddr());
+		maskBit = Bitmap.createBitmap(frameBit.getWidth(), frameBit.getHeight(), Bitmap.Config.ARGB_8888);
+		Utils.matToBitmap(mask, maskBit);
+	}
+	
+	public void switchBitmaps() {
+		setImageBitmap(showFrame ? maskBit : frameBit);
+		showFrame = !showFrame;
 	}
 
 	/** An async task to calculate the GrabCut using some Strokes. */

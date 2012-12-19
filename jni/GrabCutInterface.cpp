@@ -48,6 +48,13 @@ extern "C"
 		Mat* mask = grabCutObject->getMaskedImage();
 		cvtColor(*mask, *frame, CV_RGB2RGBA, 4);
 	}
+
+	JNIEXPORT void JNICALL Java_edu_ethz_s3d_GrabCutView_getMask(JNIEnv* env, jobject, jlong addrFrame)
+	{
+		Mat* frame = (Mat*)addrFrame;
+		Mat* mask = grabCutObject->getScreenMask();
+		cvtColor(*mask, *frame, CV_GRAY2RGBA, 4);
+	}
 	JNIEXPORT jint JNICALL Java_edu_ethz_s3d_GrabCutView_getFrameHeight(JNIEnv* env, jobject)
 	{
 		return grabCutObject->getHeight();
