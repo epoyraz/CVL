@@ -216,6 +216,7 @@ public class GrabCutView extends ImageView implements OnTouchListener {
 	    			list.add((float)Math.round((last.x + distX*i) / scale + wSupplement));
 	    			list.add((float)Math.round((last.y + distY*i) / scale + hSupplement));
     			}
+    			last = coord;
     		}
     	}
     	float[] finalArray = new float[list.size()];
