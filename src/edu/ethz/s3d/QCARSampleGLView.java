@@ -11,8 +11,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-import org.opencv.core.Mat;
-
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
@@ -22,18 +20,25 @@ import android.view.View.OnTouchListener;
 import com.qualcomm.QCAR.QCAR;
 
 
-/** S3DView is a support class for the QCAR samples applications.
- * 
- *  Responsible for setting up and configuring the OpenGL surface view.
- *  
+/**
+ * QCARSampleGLView is responsible for setting up and configuring the OpenGL surface view.
  * */
 public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
 {
+	/**
+	 * The parent activity which is needed for callbacks
+	 */
 	protected S3D mActivity;
 	
+	/**
+	 * Boolean whether to use OpenGL ES 2.0 or not
+	 */
     private static boolean mUseOpenGLES2 = true;
 
-    /** Constructor. */
+    /**
+     * Saves the parent activity and subscribes to the onTouchListener
+     * @param context the parent activity
+     */
     public QCARSampleGLView(S3D context)
     {
         super(context);
@@ -43,7 +48,13 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     }
 
     
-    /** Initialization. */
+    /**
+     * This sets all the values needed for propper OpenGL functionality
+     * @param flags Whether to use OpenGL ES 2.0 or not (if possible)
+     * @param translucent Whether to have translucency or not
+     * @param depth The color depth of the image
+     * @param stencil The stencil size
+     */
     public void init(int flags, boolean translucent, int depth, int stencil)
     {
         DebugLog.LOGD("S3DView::init");
@@ -88,6 +99,9 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory
     {
         private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+        /**
+         * Creates an OpenGL context
+         */
         public EGLContext createContext(EGL10 egl, EGLDisplay display,
             EGLConfig eglConfig)
         {
@@ -115,6 +129,9 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
             return context;
         }
 
+        /**
+         * Destroys an OpenGL context
+         */
         public void destroyContext(EGL10 egl, EGLDisplay display,
             EGLContext context)
         {
@@ -122,7 +139,11 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
         }
     }
 
-    /** Checks the OpenGL error. */
+    /**
+     * Checks the OpenGL error.
+     * @param prompt The debug string to show if there is an error
+     * @param egl The OpenGL environment
+     */
     private static void checkEglError(String prompt, EGL10 egl)
     {
 		DebugLog.LOGD("S3DView::checkEglError");
@@ -134,7 +155,9 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
     }
 
 
-    /** The config chooser. */
+    /**
+     * Choses the appropriate config for the given color depths
+     */
     private static class ConfigChooser implements GLSurfaceView.EGLConfigChooser
     {
         public ConfigChooser(int r, int g, int b, int a, int depth, int stencil)
@@ -263,6 +286,9 @@ public class QCARSampleGLView extends GLSurfaceView implements OnTouchListener
         private int[] mValue = new int[1];
     }
     
+    /**
+     * Checks whether we have a tracked surface and then starts the GrabCutView
+     */
     public boolean onTouch(View v, MotionEvent event) {
     	if (mActivity.hasTarget()) 
     		mActivity.startGrabCutView();
