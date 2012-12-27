@@ -1,0 +1,131 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[breaklinks=true,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+%\ifcvprfinal\pagestyle{empty}\fi
+%\setcounter{page}{4321}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Silhouette-based live 3D reconstruction}
+
+\author{Stefan Goetschi\\
+ETH Zurich\\
+{\tt\small gostefan@ethz.ch}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+\and
+Enes Poyraz\\
+ETH Zurich\\
+{\tt\small poyraze@ethz.ch}
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+   The ABSTRACT is to be in fully-justified italicized text, at the top
+   of the left-hand column, below the author and affiliation
+   information. Use the word ``Abstract'' as the title, in 12-point
+   Times, boldface type, centered relative to the column, initially
+   capitalized. The abstract is to be in 10-point, single-spaced type.
+   Leave two blank lines after the Abstract, then begin the main text.
+   Look at previous CVPR abstracts to get a feel for style and length.
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+
+In the following we will introduce in all the concepts we used in our project. This ranges from Grab Cut over 3D reconstruction on to volume rendering.
+
+Further we would like to shortly introduce all libraries we used for our implementation.
+
+%-------------------------------------------------------------------------
+\subsection{Libraries}
+
+Describe the libraries.
+
+%-------------------------------------------------------------------------
+\subsection{Grab Cut}
+
+Describe Grab Cut.
+
+\subsection{3D Reconstruction}
+
+Describe 3D reconstruction.
+
+%-------------------------------------------------------------------------
+\subsection{Volume Rendering}
+
+Describe volume rendering.
+
+\section{The Application}
+
+Now that all the necessairy knowledge is introduced we would like to go into some parts of our project in depth.
+
+%-------------------------------------------------------------------------
+\subsection{Class diagram}
+
+Here we state which class is used in which state and how they communicate with each other
+
+%-------------------------------------------------------------------------
+\subsection{Grab Cut selection}
+
+This explains how the strokes are captured and relayied to the native code
+
+%-------------------------------------------------------------------------
+\subsection{Matrix handling}
+
+Here we explain how the matrix contents are gathered and used
+
+%-------------------------------------------------------------------------
+\subsection{Texture usage}
+
+Here we explain the concept of using a 2D texture to simulate a 3D texture
+
+%------------------------------------------------------------------------
+\section{Conclusions}
+
+%-------------------------------------------------------------------------
+\subsection{Advantages of a mobile solution}
+
+We blable about how nice it is that it is all on the phone now... yay!
+
+%-------------------------------------------------------------------------
+\subsection{Possible Improvements}
+
+We tell them what part we screwed up (Multithreading, etc.) As in the presentation.
+
+%-------------------------------------------------------------------------
+\subsection{Limitations}
+
+We talk about the problem that only the visual hull can be reconstructed using this technique and that voxel carving would be so much nicer but probably not feasible.
+
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{egbib}
+}
+
+\end{document}
