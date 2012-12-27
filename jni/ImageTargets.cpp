@@ -58,15 +58,11 @@ unsigned int texId = 0;
 unsigned int backgroundTexture  = 0;
 
 // OpenGL ES 2.0 specific:
-// TODO: Remove this as soon as we are finished. Otherwise I always get errors
-#ifndef USE_OPENGL_ES_2_0
 #define USE_OPENGL_ES_2_0
-#endif
 #ifdef USE_OPENGL_ES_2_0
 unsigned int shaderProgramID    = 0;
 GLint vertexHandle              = 0;
 GLint normalHandle              = 0;
-//GLint textureCoordHandle        = 0;
 GLint mvpMatrixHandle           = 0;
 GLint vertexColorHandle			= 0;
 #endif
@@ -90,9 +86,9 @@ QCAR::DataSet* dataSetTarmac            = 0;
 
 bool switchDataSetAsap          = false;
 
-// Object to receive update callbacks from QCAR SDK
+// Switches the dataset
 class ImageTargets_UpdateCallback : public QCAR::UpdateCallback
-{   
+{
     virtual void QCAR_onUpdate(QCAR::State& /*state*/)
     {
         if (switchDataSetAsap)
@@ -101,22 +97,17 @@ class ImageTargets_UpdateCallback : public QCAR::UpdateCallback
 
             // Get the image tracker:
             QCAR::TrackerManager& trackerManager = QCAR::TrackerManager::getInstance();
-            QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(
-                trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
-            if (imageTracker == 0 || dataSetStonesAndChips == 0 || dataSetTarmac == 0 ||
-                imageTracker->getActiveDataSet() == 0)
-            {
+            QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
+            if (imageTracker == 0 || dataSetStonesAndChips == 0 || dataSetTarmac == 0 || imageTracker->getActiveDataSet() == 0) {
                 LOG("Failed to switch data set.");
                 return;
             }
             
-            if (imageTracker->getActiveDataSet() == dataSetStonesAndChips)
-            {
+            if (imageTracker->getActiveDataSet() == dataSetStonesAndChips) {
                 imageTracker->deactivateDataSet(dataSetStonesAndChips);
                 imageTracker->activateDataSet(dataSetTarmac);
             }
-            else
-            {
+            else {
                 imageTracker->deactivateDataSet(dataSetTarmac);
                 imageTracker->activateDataSet(dataSetStonesAndChips);
             }
@@ -171,8 +162,7 @@ Java_edu_ethz_s3d_S3D_initTracker(JNIEnv *, jobject)
     // Initialize the image tracker:
     QCAR::TrackerManager& trackerManager = QCAR::TrackerManager::getInstance();
     QCAR::Tracker* tracker = trackerManager.initTracker(QCAR::Tracker::IMAGE_TRACKER);
-    if (tracker == NULL)
-    {
+    if (tracker == NULL) {
         LOG("Failed to initialize ImageTracker.");
         return 0;
     }
@@ -181,7 +171,7 @@ Java_edu_ethz_s3d_S3D_initTracker(JNIEnv *, jobject)
     return 1;
 }
 
-// Deinits the tracker
+// Deinitializes the tracker
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3D_deinitTracker(JNIEnv *, jobject)
 {
@@ -192,7 +182,7 @@ Java_edu_ethz_s3d_S3D_deinitTracker(JNIEnv *, jobject)
     trackerManager.deinitTracker(QCAR::Tracker::IMAGE_TRACKER);
 }
 
-// Tries to load the tracker image data and activates the StonesAndChips dataset (returns 1 on success, 0 on fail)
+// Loads the tracker image data and activates the StonesAndChips dataset (returns 1 on success, 0 on fail)
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_loadTrackerData(JNIEnv *, jobject)
 {
@@ -200,46 +190,38 @@ Java_edu_ethz_s3d_S3D_loadTrackerData(JNIEnv *, jobject)
     
     // Get the image tracker:
     QCAR::TrackerManager& trackerManager = QCAR::TrackerManager::getInstance();
-    QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(
-                    trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
-    if (imageTracker == NULL)
-    {
-        LOG("Failed to load tracking data set because the ImageTracker has not"
-            " been initialized.");
+    QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
+    if (imageTracker == NULL) {
+        LOG("Failed to load tracking data set because the ImageTracker has not been initialized.");
         return 0;
     }
 
     // Create the data sets:
     dataSetStonesAndChips = imageTracker->createDataSet();
-    if (dataSetStonesAndChips == 0)
-    {
+    if (dataSetStonesAndChips == 0) {
         LOG("Failed to create a new tracking data.");
         return 0;
     }
 
     dataSetTarmac = imageTracker->createDataSet();
-    if (dataSetTarmac == 0)
-    {
+    if (dataSetTarmac == 0) {
         LOG("Failed to create a new tracking data.");
         return 0;
     }
 
     // Load the data sets:
-    if (!dataSetStonesAndChips->load("StonesAndChips.xml", QCAR::DataSet::STORAGE_APPRESOURCE))
-    {
+    if (!dataSetStonesAndChips->load("StonesAndChips.xml", QCAR::DataSet::STORAGE_APPRESOURCE)) {
         LOG("Failed to load data set.");
         return 0;
     }
 
-    if (!dataSetTarmac->load("Tarmac.xml", QCAR::DataSet::STORAGE_APPRESOURCE))
-    {
+    if (!dataSetTarmac->load("Tarmac.xml", QCAR::DataSet::STORAGE_APPRESOURCE)) {
         LOG("Failed to load data set.");
         return 0;
     }
 
     // Activate the data set:
-    if (!imageTracker->activateDataSet(dataSetStonesAndChips))
-    {
+    if (!imageTracker->activateDataSet(dataSetStonesAndChips)) {
         LOG("Failed to activate data set.");
         return 0;
     }
@@ -248,35 +230,28 @@ Java_edu_ethz_s3d_S3D_loadTrackerData(JNIEnv *, jobject)
     return 1;
 }
 
-// Tries to deactivate and destroy the datasets (returns 1 on success, 0 on fail)
+// Deactivates and destroys the datasets (returns 1 on success, 0 on fail)
 JNIEXPORT int JNICALL
 Java_edu_ethz_s3d_S3D_destroyTrackerData(JNIEnv *, jobject)
 {
     LOG("Java_edu_ethz_s3d_S3D_destroyTrackerData");
 
-    // Get the image tracker:
+    // Get the image tracker
     QCAR::TrackerManager& trackerManager = QCAR::TrackerManager::getInstance();
-    QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(
-        trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
-    if (imageTracker == NULL)
-    {
-        LOG("Failed to destroy the tracking data set because the ImageTracker has not"
-            " been initialized.");
+    QCAR::ImageTracker* imageTracker = static_cast<QCAR::ImageTracker*>(trackerManager.getTracker(QCAR::Tracker::IMAGE_TRACKER));
+    if (imageTracker == NULL) {
+        LOG("Failed to destroy the tracking data set because the ImageTracker has not been initialized.");
         return 0;
     }
     
-    if (dataSetStonesAndChips != 0)
-    {
-        if (imageTracker->getActiveDataSet() == dataSetStonesAndChips &&
-            !imageTracker->deactivateDataSet(dataSetStonesAndChips))
-        {
-            LOG("Failed to destroy the tracking data set StonesAndChips because the data set "
-                "could not be deactivated.");
+    // Destroy "Stones and Chips" if loaded
+    if (dataSetStonesAndChips != 0) {
+        if (imageTracker->getActiveDataSet() == dataSetStonesAndChips && !imageTracker->deactivateDataSet(dataSetStonesAndChips)) {
+            LOG("Failed to destroy the tracking data set StonesAndChips because the data set could not be deactivated.");
             return 0;
         }
 
-        if (!imageTracker->destroyDataSet(dataSetStonesAndChips))
-        {
+        if (!imageTracker->destroyDataSet(dataSetStonesAndChips)) {
             LOG("Failed to destroy the tracking data set StonesAndChips.");
             return 0;
         }
@@ -285,18 +260,15 @@ Java_edu_ethz_s3d_S3D_destroyTrackerData(JNIEnv *, jobject)
         dataSetStonesAndChips = 0;
     }
 
+    // Destroy "Tarmac" if loaded
     if (dataSetTarmac != 0)
     {
-        if (imageTracker->getActiveDataSet() == dataSetTarmac &&
-            !imageTracker->deactivateDataSet(dataSetTarmac))
-        {
-            LOG("Failed to destroy the tracking data set Tarmac because the data set "
-                "could not be deactivated.");
+        if (imageTracker->getActiveDataSet() == dataSetTarmac && !imageTracker->deactivateDataSet(dataSetTarmac)) {
+            LOG("Failed to destroy the tracking data set Tarmac because the data set could not be deactivated.");
             return 0;
         }
 
-        if (!imageTracker->destroyDataSet(dataSetTarmac))
-        {
+        if (!imageTracker->destroyDataSet(dataSetTarmac)) {
             LOG("Failed to destroy the tracking data set Tarmac.");
             return 0;
         }
@@ -321,15 +293,13 @@ Java_edu_ethz_s3d_S3D_onQCARInitializedNative(JNIEnv *, jobject)
     // QCAR::setHint(QCAR::HINT_IMAGE_TARGET_MULTI_FRAME_ENABLED, 1);
 }
 
-// Initializes the renderer to render the teapot
-// Here I deactivated the background rendering
+// Does all the rendering stuff
 JNIEXPORT void JNICALL
 Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-    // Would be too verbose: LOG("Java_edu_ethz_S3D_GLRenderer_renderFrame");
     // Clear color and depth buffer 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -353,13 +323,13 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    // TODO: Only work, when there is exactly one trackable
     // Did we find any trackables this frame?
     for(int tIdx = 0; tIdx < state.getNumActiveTrackables(); tIdx++)
     {
         // Get the trackable:
         const QCAR::Trackable* trackable = state.getActiveTrackable(tIdx);
-        QCAR::Matrix44F modelViewMatrix =
-            QCAR::Tool::convertPose2GLMatrix(trackable->getPose());        
+        QCAR::Matrix44F modelViewMatrix = QCAR::Tool::convertPose2GLMatrix(trackable->getPose());
 
         // Choose the texture based on the target name:
         int textureIndex;
@@ -398,58 +368,59 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
                        (const GLvoid*) &teapotIndices[0]);
 #else
 
+        // Calculate the projection matrix
         QCAR::Matrix44F modelViewProjection;
+        SampleUtils::translatePoseMatrix(0.0f, 0.0f, kObjectScale, &modelViewMatrix.data[0]);
+        SampleUtils::scalePoseMatrix(kObjectScale, kObjectScale, kObjectScale, &modelViewMatrix.data[0]);
+        SampleUtils::multiplyMatrix(&projectionMatrix.data[0], &modelViewMatrix.data[0], &modelViewProjection.data[0]);
 
-        SampleUtils::translatePoseMatrix(0.0f, 0.0f, kObjectScale,
-                                         &modelViewMatrix.data[0]);
-        SampleUtils::scalePoseMatrix(kObjectScale, kObjectScale, kObjectScale,
-                                     &modelViewMatrix.data[0]);
-        SampleUtils::multiplyMatrix(&projectionMatrix.data[0],
-                                    &modelViewMatrix.data[0] ,
-                                    &modelViewProjection.data[0]);
-
-        //LOG("ModelView : X (%f), Y (%f), Z (%f), W (%f)", 640*modelViewMatrix.data[12]/modelViewMatrix.data[14], 640*modelViewMatrix.data[13]/modelViewMatrix.data[14], modelViewMatrix.data[14]/modelViewMatrix.data[14], modelViewMatrix.data[15]);
+        // Calculate the camera position
         QCAR::Matrix44F inverseModelView = SampleMath::Matrix44FTranspose(SampleMath::Matrix44FInverse(modelViewMatrix));
         QCAR::Vec3F cameraPosition(inverseModelView.data[12], inverseModelView.data[13], inverseModelView.data[14]);
 
+        // Select the shader program
         glUseProgram(shaderProgramID);
-         
-        glVertexAttribPointer(vertexHandle, 3, GL_FLOAT, GL_FALSE, 0,
-                              (const GLvoid*) &teapotVertices[0]);
-        glVertexAttribPointer(vertexColorHandle,3,GL_FLOAT, GL_FALSE, 0,
-                (const GLvoid*) &color[0]);
-        glVertexAttribPointer(normalHandle, 3, GL_FLOAT, GL_FALSE, 0,
-                              (const GLvoid*) &teapotNormals[0]);
 
+        // Load the vertex attributes
+        glVertexAttribPointer(vertexHandle, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) &teapotVertices[0]);
+        glVertexAttribPointer(vertexColorHandle,3,GL_FLOAT, GL_FALSE, 0, (const GLvoid*) &color[0]);
+        glVertexAttribPointer(normalHandle, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) &teapotNormals[0]);
+
+        // Enable the vertex attributes
         glEnableVertexAttribArray(vertexHandle);
         glEnableVertexAttribArray(normalHandle);
         glEnableVertexAttribArray(vertexColorHandle);
         
+        // Load the reconstruction data
         if (reconstructionHandler != NULL) {
-        	 glDeleteTextures(1, &texId);
-        	 texId = reconstructionHandler->getTexture();
-             float slices[2] = { reconstructionHandler->getOverX(), reconstructionHandler->getOVerY() };
-             glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
-             glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), reconstructionHandler->getNSlices());
+        	// First delete the old texture
+        	glDeleteTextures(1, &texId);
+        	// Load the reconstruction texture and its corresponding data
+        	texId = reconstructionHandler->getTexture();
+            float slices[2] = { reconstructionHandler->getOverX(), reconstructionHandler->getOVerY() };
+            glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
+            glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), reconstructionHandler->getNSlices());
         }
         else {
+        	// Load the texture specifications for the white texture
             float slices[2] = { 2.f, 1.f };
             glUniform2fv(glGetUniformLocation(shaderProgramID, "slicesOver"), 1, (const GLfloat*) slices);
             glUniform1f(glGetUniformLocation(shaderProgramID, "numberOfSlices"), 2);
         }
 
+        // Load the eye position into the shader program
         glUniform3fv(glGetUniformLocation(shaderProgramID, "eyePos"), 1, (const GLfloat*) &cameraPosition.data[0]);
 
+        // Load the texture into texture0 and set uVolData to 0 to load it
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texId);
-
-        GLint loc = glGetUniformLocation(shaderProgramID, "uVolData");
-
         glUniform1i(glGetUniformLocation(shaderProgramID, "uVolData"), 0);
 
-
+        // Load the projection matrix into its uniform
         glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE,
                            (GLfloat*)&modelViewProjection.data[0] );
+
+        // Draw the cube
         glDrawElements(GL_TRIANGLES, NUM_TEAPOT_OBJECT_INDEX, GL_UNSIGNED_SHORT,
                        (const GLvoid*) &teapotIndices[0]);
 
@@ -464,12 +435,10 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-  //  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 #else
     glDisableVertexAttribArray(vertexHandle);
     glDisableVertexAttribArray(normalHandle);
-   // glDisableVertexAttribArray(textureCoordHandle);
     glDisableVertexAttribArray(vertexColorHandle);
 #endif
 
@@ -479,8 +448,7 @@ Java_edu_ethz_s3d_S3DRenderer_renderFrame(JNIEnv *, jobject)
 }
 
 
-void
-configureVideoBackground()
+void configureVideoBackground()
 {
 	QCAR::setFrameFormat(QCAR::RGB888, true);
     // Get the default video mode:
@@ -535,8 +503,7 @@ configureVideoBackground()
 
 // Sets screen dimensions, gets the texture count, loads and stores them
 JNIEXPORT void JNICALL
-Java_edu_ethz_s3d_S3D_initApplicationNative(
-                            JNIEnv* env, jobject obj, jint width, jint height)
+Java_edu_ethz_s3d_S3D_initApplicationNative(JNIEnv* env, jobject obj, jint width, jint height)
 {
     LOG("Java_edu_ethz_s3d_S3D_initApplicationNative");
     
@@ -591,8 +558,7 @@ Java_edu_ethz_s3d_S3D_initApplicationNative(
 
 // Deletes the textures
 JNIEXPORT void JNICALL
-Java_edu_ethz_s3d_S3D_deinitApplicationNative(
-                                                        JNIEnv* env, jobject obj)
+Java_edu_ethz_s3d_S3D_deinitApplicationNative(JNIEnv* env, jobject obj)
 {
     LOG("Java_edu_ethz_s3d_S3D_deinitApplicationNative");
 
@@ -615,8 +581,7 @@ Java_edu_ethz_s3d_S3D_deinitApplicationNative(
 //Starts the camera module and starts the imageTracker
 // Dependency: Calls configureVideoBackground
 JNIEXPORT void JNICALL
-Java_edu_ethz_s3d_S3D_startCamera(JNIEnv *,
-                                                                         jobject)
+Java_edu_ethz_s3d_S3D_startCamera(JNIEnv *, jobject)
 {
     LOG("Java_edu_ethz_s3d_S3D_startCamera");
 
@@ -733,24 +698,9 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
 {
     LOG("Java_edu_ethz_s3d_S3DRenderer_initRendering");
 
-  //  glGenTextures(1, &(backgroundTexture));
-  //  glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-
     // Define clear color
     glClearColor(0.0f, 0.0f, 0.0f, QCAR::requiresAlpha() ? 0.0f : 1.0f);
     
-    // Now generate the OpenGL texture objects and add settings
-    for (int i = 0; i < textureCount; ++i)
-    {
-      //  glGenTextures(1, &(textures[i]->mTextureID));
-      //  glBindTexture(GL_TEXTURE_2D, textures[i]->mTextureID);
-     //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-     //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-     //       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textures[i]->mWidth,
-     //           textures[i]->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-     //           (GLvoid*)  textures[i]->mData);
-    }
-
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -772,8 +722,6 @@ Java_edu_ethz_s3d_S3DRenderer_initRendering(JNIEnv* env, jobject obj)
                                                 "vertexPosition");
     normalHandle        = glGetAttribLocation(shaderProgramID,
                                                 "vertexNormal");
-//    textureCoordHandle  = glGetAttribLocation(shaderProgramID,
-//                                                "vertexTexCoord");
     mvpMatrixHandle     = glGetUniformLocation(shaderProgramID,
                                                 "modelViewProjectionMatrix");
 

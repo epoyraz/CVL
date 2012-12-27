@@ -38,9 +38,6 @@ void main() \
 } \
 ";
 
-
-//return mix( texture2D(texSampler2D,texpos1).x, texture2D(texSampler2D,texpos2).x, (volpos.z*numberOfSlices)-s1);\
-
 static const char* cubeFragmentShader = " \
 \
 precision mediump float; \

@@ -39,7 +39,7 @@ public:
 
 	// Executes the actual GrabCut
 	void executeGrabCut(int iterations);
-	// Returns the image masked
+	// Returns the masked image
 	Mat* getMaskedImage();
 	// Returns the mask
 	Mat* getMask();
@@ -47,7 +47,7 @@ public:
 	Mat* getScreenMask();
 	// Returns the ModelView matrix
 	Mat* getMVMatrix();
-	// Unsets the models to split the image
+	// Unsets the models to segment the image
 	void unsetModels();
 	// Grab Frame
 	void grabFrame();

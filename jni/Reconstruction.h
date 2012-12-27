@@ -41,14 +41,33 @@ public:
 private:
 	void calculateSizes();
 	void getCameraMatrix();
-	char getAt(int x, int y, int z);
-	void setAt(int x, int y, int z, char value);
+	/**
+	 * Stores the intermediate texture
+	 */
 	IplImage* voxe;
+	/**
+	 * Stores the camera matrix
+	 */
 	Mat* cameraMatrix;
+	/**
+	 * Stores the boolean value whether a voxel is active or not
+	 */
 	bool* voxels;
+	/**
+	 * Stores how many voxels are in x, y and z direction
+	 */
 	int x, y, z;
+	/**
+	 * Stores how many texels are in total width and total height
+	 */
 	int width, height;
+	/**
+	 * Stores how many slices in x and y direction are stored in the texture
+	 */
 	int nWidth, nHeight;
+	/**
+	 * Stores the image width/height
+	 */
 	int imgWidth, imgHeight;
 };
 

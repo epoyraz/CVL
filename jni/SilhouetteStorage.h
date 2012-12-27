@@ -19,7 +19,7 @@ using namespace std;
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #ifndef LOG_TAG
-#define LOG_TAG "GrabCut"
+#define LOG_TAG "SilhouetteStorage"
 #endif
 
 class SilhouetteStorage {
@@ -33,7 +33,13 @@ public:
 	Mat* getLastMVMatrice();
 	int getNumSilhouettes();
 private:
+	/**
+	 * The storage list for the silhouettes
+	 */
 	vector<Mat*>* silhouettes;
+	/**
+	 * The storage list for the model view matrices
+	 */
 	vector<Mat*>* mvMatrices;
 };
 

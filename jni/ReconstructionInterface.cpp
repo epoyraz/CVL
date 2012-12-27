@@ -16,6 +16,9 @@ Reconstruction* reconstructionHandler = NULL;
 
 extern "C"
 {
+	/**
+	 * Instantiates the reconstruction
+	 */
 	JNIEXPORT void JNICALL Java_edu_ethz_s3d_Reconstruction_generateReconstruction(JNIEnv* env, jobject, jint x, jint y, jint z)
 	{
 		if (reconstructionHandler != NULL)
@@ -27,6 +30,9 @@ extern "C"
 		reconstructionHandler = new Reconstruction(width, height, x, y, z);
 	}
 
+	/**
+	 * Adds the latest silhouette to the reconstruction
+	 */
 	JNIEXPORT void JNICALL Java_edu_ethz_s3d_Reconstruction_refineWithLatestCut(JNIEnv* env, jobject)
 	{
 		Mat* silhouette = sStorage->getLastSilhouette();

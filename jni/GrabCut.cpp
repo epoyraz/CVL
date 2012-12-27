@@ -1,5 +1,9 @@
 #include "GrabCut.h"
 
+/**
+ * The scale between the internal coordinate system and the vuforia coordinate system
+ * Also defined in ImageTargets.cpp
+ */
 const float kObjectScale = 3.f;
 
 GrabCut::GrabCut() {
@@ -9,11 +13,19 @@ GrabCut::GrabCut() {
 GrabCut::~GrabCut() {
 }
 
+/**
+ * Unsets the models for fore- and background
+ * Currently it is unused
+ */
 void GrabCut::unsetModels() {
 	bgdModel.release();
 	fgdModel.release();
 }
 
+/**
+ * Adds the contents of a vector of points to the foreground
+ * @param bgdPixels The vector of points which are surely foreground
+ */
 void GrabCut::addForegroundStroke(vector<Point>& fgdPixels) {
 	for (vector<Point>::const_iterator it = fgdPixels.begin(); it != fgdPixels.end(); it++) {
 		//LOG("Changing at %d, %d ", (*it).x, (*it).y);
@@ -21,6 +33,10 @@ void GrabCut::addForegroundStroke(vector<Point>& fgdPixels) {
 	}
 }
 
+/**
+ * Adds the contents of a vector of points to the background
+ * @param bgdPixels The vector of points which are surely background
+ */
 void GrabCut::addBackgroundStroke(vector<Point>& bgdPixels) {
 	for (vector<Point>::const_iterator it = bgdPixels.begin(); it != bgdPixels.end(); it++) {
 		//LOG("Changing at %d, %d ", (*it).x, (*it).y);
@@ -28,10 +44,14 @@ void GrabCut::addBackgroundStroke(vector<Point>& bgdPixels) {
 	}
 }
 
+/**
+ * Executes the GrabCut with the given number of iterations
+ * @param iterations The number of iterations to do
+ */
 void GrabCut::executeGrabCut(int iterations) {
-	LOG("Executing GrabCut");
+	// Actually compute the grabCut
 	grabCut(frame, mask, rect, bgdModel, fgdModel, 1, GC_EVAL);
-	LOG("Executed GrabCut");
+	// Copy the mask screen mask
 	mask.copyTo(screenMask);
 	// Iterate through all pixels and set fore/background
 	for (int i = 0; i < frame.rows; i++) {
@@ -62,39 +82,57 @@ void GrabCut::executeGrabCut(int iterations) {
 			screenMask.at<char>(i, j) = screen;
 		}
 	}
-	LOG("Created Frame");
+	LOG("Executed GrabCut and created frame");
 }
 
+/**
+ * Loads the frame and model view matrix
+ */
 void GrabCut::grabFrame() {
 	mvMat = getModelViewMat();
-	LOG("Projection Mat:");
-	LOG(" %f %f %f %f", mvMat->at<float>(0,0), mvMat->at<float>(0,1), mvMat->at<float>(0,2), mvMat->at<float>(0,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(1,0), mvMat->at<float>(1,1), mvMat->at<float>(1,2), mvMat->at<float>(1,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(2,0), mvMat->at<float>(2,1), mvMat->at<float>(2,2), mvMat->at<float>(2,3));
-	LOG(" %f %f %f %f", mvMat->at<float>(3,0), mvMat->at<float>(3,1), mvMat->at<float>(3,2), mvMat->at<float>(3,3));
 	frame = getFrame();
-	LOG("Loaded Frame");
 	frame.copyTo(lastMasked);
+	LOG("Loaded Frame and model view matrix:");
 }
 
+/**
+ * Returns the masked image pointer
+ * @return The pointer to the last masked image
+ */
 Mat* GrabCut::getMaskedImage() {
 	return &lastMasked;
 }
 
+/**
+ * Returns the mask pointer
+ * @return The pointer to the last mask
+ */
 Mat* GrabCut::getMask() {
 	return &mask;
 }
 
+/**
+ * Returns the pointer to the mask for displaying
+ * @return The pointer to the mask for displaying
+ */
 Mat* GrabCut::getScreenMask() {
 	return &screenMask;
 }
 
+/**
+ * Returns the pointer to the model view matrix
+ * @return The pointer to the model view matrix
+ */
 Mat* GrabCut::getMVMatrix() {
 	return mvMat;
 }
 
+/**
+ * Loads the model view matrix from vuforia
+ * It also converts it from OpenGL matrix format to OpenCV format
+ * @return The pointer to the model view matrix
+ */
 Mat* GrabCut::getModelViewMat() {
-	LOG("Getting MV-Matrix");
 	QCAR::State state = QCAR::Renderer::getInstance().begin();
 	// Only get something meaningful if exactly one trackable is tracked
 	if (state.getNumActiveTrackables() == 1) {
@@ -112,7 +150,7 @@ Mat* GrabCut::getModelViewMat() {
 		for (int i = 0; i < 4*4; i++) {
 			data[i] = modelViewMatrix.data[(i%4)*4+(i/4)];
 		}
-		LOG ("Allocated Memory for mv-Matrix and copied data.");
+		LOG ("Gathered the model view matrix from vuforia");
 
 		// Create matrix
 		return new Mat(4, 4, DataType<float>::type, data);
@@ -120,8 +158,11 @@ Mat* GrabCut::getModelViewMat() {
 	return new Mat();
 }
 
+/**
+ * Loads the frame data from vuforia
+ * @return Returns a matrix with the frame data stored in it
+ */
 Mat GrabCut::getFrame() {
-	LOG("Getting Frame");
 	QCAR::State state = QCAR::Renderer::getInstance().begin();
 	// Get the frame data
 	QCAR::Frame frame = state.getFrame();
@@ -130,6 +171,7 @@ Mat GrabCut::getFrame() {
 		const QCAR::Image *qcarImage = frame.getImage(i);
 		if (qcarImage->getFormat() == QCAR::RGB888)
 		{
+			LOG("Gathered the frame data from vuforia");
 			// Create a matrix with 3 channels, the image height and width
 			return Mat(qcarImage->getHeight(), qcarImage->getWidth(), CV_8UC3, (unsigned char *) const_cast<void*>(qcarImage->getPixels()));
 		}
@@ -137,14 +179,29 @@ Mat GrabCut::getFrame() {
 	return Mat();
 }
 
+/**
+ * Returns the height of the last captured frame
+ * @return The number of pixels in the height of the frame
+ */
 int GrabCut::getHeight() {
 	return frame.rows;
 }
 
+/**
+ * Returns the width of the last captured frame
+ * @return The number of pixels in the width of the frame
+ */
 int GrabCut::getWidth() {
 	return frame.cols;
 }
 
+/**
+ * Initiates the GrabCut with a rectangle
+ * @param left The distance of the left coordinate
+ * @param top The distance of the top coordinate
+ * @param right The distance of the right coordinate (from the left border)
+ * @param bottom The distance of the bottom coordinate (from the top border)
+ */
 void GrabCut::initRect(int left, int top, int right, int bottom) {
 	rect = Rect(Point(left, top), Point(right, bottom));
 	LOG("Rect GrabCut");

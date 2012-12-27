@@ -7,25 +7,45 @@
 
 #include "Reconstruction.h"
 
-
+/**
+ * Initializes all storages, gathers the camera matrix and calculates the texture dimensions
+ * @param width_in The width of each frame image
+ * @param height_in The height of each frame image
+ * @param x_in The number of voxels in x direction
+ * @param y_in The number of voxels in y direction
+ * @param z_in The number of voxels in z direction
+ */
 Reconstruction::Reconstruction(int width_in, int height_in, int x_in, int y_in, int z_in) :
 	x(x_in), y(y_in), z(z_in), imgWidth(width_in), imgHeight(height_in) {
-	LOG("Allocating Voxels. x: %d , y: %d , z: %d ", x, y, z);
+	// Allocate the boolean storage for the voxels
 	voxels = new bool[x * y * z];
 	memset(voxels, (unsigned char)255, x*y*z*sizeof(bool));
-	LOG("All voxels set true.");
 
+	// Calculate how to distribute the texels on the texture
 	calculateSizes();
-	LOG("Sizes calculated.");
 
+	// Allocate the image to store the voxels on
 	voxe = cvCreateImage(cvSize(width, height) , IPL_DEPTH_8U, 4);
 	memset(voxe->imageData, (uchar) 255, width*height*4*sizeof(uchar));
-	LOG("Image all voxels set true.");
 
+	// Get the camera matrix for correct reconstruction
 	getCameraMatrix();
-	LOG("Set Camera Matrix");
+	LOG("Initialized the reconstruction");
 }
 
+/**
+ * Deletes all storages
+ */
+Reconstruction::~Reconstruction() {
+	delete voxels;
+	cvReleaseImage(&voxe);
+	delete cameraMatrix->data;
+	delete cameraMatrix;
+}
+
+/**
+ * Gathers the camera matrix from vuforia and stores it locally
+ */
 void Reconstruction::getCameraMatrix() {
 	LOG("Getting Camera Matrix");
 	const QCAR::CameraCalibration& cameraCalibration = QCAR::CameraDevice::getInstance().getCameraCalibration();
@@ -41,13 +61,11 @@ void Reconstruction::getCameraMatrix() {
 
 	// Create matrix
 	cameraMatrix = new Mat(4, 4, DataType<float>::type, data);
-	LOG("Camera Matrix");
-	LOG(" %f %f %f %f", cameraMatrix->at<float>(0,0), cameraMatrix->at<float>(0,1), cameraMatrix->at<float>(0,2), cameraMatrix->at<float>(0,3));
-	LOG(" %f %f %f %f", cameraMatrix->at<float>(1,0), cameraMatrix->at<float>(1,1), cameraMatrix->at<float>(1,2), cameraMatrix->at<float>(1,3));
-	LOG(" %f %f %f %f", cameraMatrix->at<float>(2,0), cameraMatrix->at<float>(2,1), cameraMatrix->at<float>(2,2), cameraMatrix->at<float>(2,3));
-	LOG(" %f %f %f %f", cameraMatrix->at<float>(3,0), cameraMatrix->at<float>(3,1), cameraMatrix->at<float>(3,2), cameraMatrix->at<float>(3,3));
 }
 
+/**
+ * Calculates all needed data to allocate the texture image
+ */
 void Reconstruction::calculateSizes() {
 	// Calculate how many pixels we need
 	int prod = x * y * z;
@@ -62,13 +80,9 @@ void Reconstruction::calculateSizes() {
 	height = nHeight * y;
 }
 
-Reconstruction::~Reconstruction() {
-	delete voxels;
-	cvReleaseImage(&voxe);
-	delete cameraMatrix->data;
-	delete cameraMatrix;
-}
-
+/**
+ * Returns an OpenGL texture with the current reconstruction state as content and scales it to an OpenGL conform size
+ */
 unsigned int Reconstruction::getTexture() {
 	//LOG("Starting texture loading");
 	unsigned int texId;
@@ -92,6 +106,11 @@ unsigned int Reconstruction::getTexture() {
 	return texId;
 }
 
+/**
+ * Adds a silhouette to the reconstruction. This removes obsolete voxels and hereby improves the reconstruction
+ * @param silhouette The silhouette that should be added
+ * @param mvMatrix The model view matrix corresponding to the silhouette
+ */
 void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 	// Precompute stuff
 	float xMinus = (x-1.f)/2;
@@ -149,29 +168,26 @@ void Reconstruction::addSilhouette(Mat* silhouette, Mat* mvMatrix) {
 	LOG("Projected all %d Voxels. Projected %d and unset %d of them.", count, countProj, countUnset);
 }
 
-char Reconstruction::getAt(int posX, int posY, int posZ) {
-	int imgX = (posZ % nWidth) * x + posX;
-	int imgY = (posZ / nWidth) * y + posY;
-	return voxe->imageData[4*(imgX * voxe->width + imgY)];
-}
-
-void Reconstruction::setAt(int posX, int posY, int posZ, char value) {
-	int imgX = (posZ % nWidth) * x + posX;
-	int imgY = (posZ / nWidth) * y + posY;
-	voxe->imageData[4*(imgX * voxe->width + imgY)] = value;
-	voxe->imageData[4*(imgX * voxe->width + imgY)+1] = value;
-	voxe->imageData[4*(imgX * voxe->width + imgY)+2] = value;
-	voxe->imageData[4*(imgX * voxe->width + imgY)+3] = value;
-}
-
+/**
+ * Returns the number of slices in the texture in x direction
+ * @return The number of slices in the texture in x direction
+ */
 float Reconstruction::getOverX() {
 	return (float)nWidth;
 }
 
+/**
+ * Returns the number of slices in the texture in y direction
+ * @return The number of slices in the texture in y direction
+ */
 float Reconstruction::getOVerY() {
 	return (float)nHeight;
 }
 
+/**
+ * Returns the number of slices in the texture
+ * @return The number of slices in the texture
+ */
 float Reconstruction::getNSlices() {
 	return (float)z;
 }
