@@ -64,16 +64,36 @@ Further we would like to shortly introduce all libraries we used for our impleme
 %-------------------------------------------------------------------------
 \subsection{Libraries}
 
-Describe the libraries.
+We shortly describe which library is used to what extent and use.
+
+\begin{description}
+	\item[Android SDK] We used the android software developer kit mostly to get a good user interface. Only a few lightweight calculations are done in Java.
+	\item[Android NDK] All time intensive computing is done in the android native development kit since this improves performance by lengths.
+	\item[vuforia] The relative position to the marker is given by the vuforia library. The application was derived from a sample within the vuforia package.
+	\item[OpenCV] The GrabCut implementation was the main reason to use OpenCV but also matrix calculations, point projections and image scaling are present.
+	\item[OpenGL ES] To display the reconstructed object we used OpenGL shaders. This gives a reasonable number of frames per second.
+\end{description}
 
 %-------------------------------------------------------------------------
 \subsection{Grab Cut}
 
-Describe Grab Cut.
+In our project Grab Cut is used to segment the pictures we record into the foreground - the object - and the background - the marker and everything around.
 
+The input is a rectangle which fully contains the foreground object and possibly some refinement strokes to improve the segmentation into foreground and background. As output we get an image with four possible values:
+
+\begin{description}
+	\item[Surely foreground] Pxels marked as foreground by the user.
+	\item[Probably foreground] Pixels the algorithm assumes are foreground.
+	\item[Surely background] Pixels marked as background by the user or outside the rectangle.
+	\item[Probably background] Pixels the algorithm assumes are background.
+\end{description}
+
+We didn't actually implement GrabCut as the OpenCV library presents an all ready implementation of the GrabCut as presented by C. Rother \etal \cite{Rother}. Our contribution was to implement an easy to use interface in our application.
+
+%-------------------------------------------------------------------------
 \subsection{3D Reconstruction}
 
-Describe 3D reconstruction.
+The first approach to this problem would have been to use the paper "Exact Voxel Occupancy with Graph Cuts" by D. Snow \etal \cite{Snow} Sadly this approach turned out to be computationally too expensive as well as too cumbersome to use on an android device as this would have meant to compile another library to android native code.
 
 %-------------------------------------------------------------------------
 \subsection{Volume Rendering}
