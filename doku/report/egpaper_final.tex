@@ -82,7 +82,7 @@ In our project Grab Cut is used to segment the pictures we record into the foreg
 The input is a rectangle which fully contains the foreground object and possibly some refinement strokes to improve the segmentation into foreground and background. As output we get an image with four possible values:
 
 \begin{description}
-	\item[Surely foreground] Pxels marked as foreground by the user.
+	\item[Surely foreground] Pixels marked as foreground by the user.
 	\item[Probably foreground] Pixels the algorithm assumes are foreground.
 	\item[Surely background] Pixels marked as background by the user or outside the rectangle.
 	\item[Probably background] Pixels the algorithm assumes are background.
@@ -95,11 +95,22 @@ We didn't actually implement GrabCut as the OpenCV library presents an all ready
 
 The first approach to this problem would have been to use the paper "Exact Voxel Occupancy with Graph Cuts" by D. Snow \etal \cite{Snow} Sadly this approach turned out to be computationally too expensive as well as too cumbersome to use on an android device as this would have meant to compile another library to android native code.
 
+We found a more basic approach in the papers of M. Potmesil \cite{Potmesil} and T.-H. Hong and M. O. Shneier \cite{Hong} which only wanted to find obstacles in the surroundings of robots. But their method is perfectly applicable for our purposes. We simplified the approach to not have an octree structure but just a large amount of equally sized cubes - so called voxels. This spared us the work on an octree structure while not sacrificing so much computing time.
+
+Our program just generates voxels in the area we expect the object to be in. Each such voxel is then projected onto the silhouette. This is done using both the camera matrix $K$ and the model view matrix $M$ which contains the camera rotation and translation. This then yields the projection formula of the voxel position $v$ to image coordinates $i$:
+\begin{align}
+	i = K \cdot M \cdot v = P \cdot v
+\end{align}
+Obviously we can for each silhouette precompute $P$. After each projection we can look up the image coordinates $i$ in the silhouette-mask. If the voxel is outside the silhouette we remove it from the reconstruction.
+
+This leads to an always decreasing number of voxels which makes each successive iteration faster.
+
 %-------------------------------------------------------------------------
 \subsection{Volume Rendering}
 
 Describe volume rendering.
 
+%-------------------------------------------------------------------------
 \section{The Application}
 
 Now that all the necessairy knowledge is introduced we would like to go into some parts of our project in depth.
