@@ -116,9 +116,37 @@ Describe volume rendering.
 Now that all the necessairy knowledge is introduced we would like to go into some parts of our project in depth.
 
 %-------------------------------------------------------------------------
-\subsection{Class diagram}
+\subsection{Classes}
+\subsubsection{Java}
 
-Here we state which class is used in which state and how they communicate with each other
+\begin{description}
+	\item[S3D] : Activity \\
+		In this class all libraries are loaded and initialized as well as the main workflows are defined. This means most vuforia settings are done here or in native code invoked from here. On the other hand the S3D class interfaces between the two views.
+	\item[S3DRenderer] : GLSurfaceView.Renderer\\
+		The S3DRenderer is mainly an interface class which relays all calls to native code.
+	\item[QCARSampleGLView] : GLSurfaceView\\
+		This contains mostly initialization functions as well as an onTouch listener used to determine when the user wants to take a picture.
+	\item[GrabCutView] : ImageView\\
+		All input and displaying regarding the GrabCut is done in this view. This means capturing the finger strokes, computing the boundary rectangle and preparing the data for the native code.
+	\item[Reconstruction] \quad \\
+		Again this is mainly an interface class which relays the calls to native code.
+	\item[DebugLog] \quad \\
+		This is a class which is provided by vuforia to ensure a simple logging environment.
+\end{description}
+
+\subsubsection{C++}
+When applicable we split our new code into three parts per class - the header file, the source file and an interface file which contains all function definitions for the communication with java code. In the following we describe triplets of files together. The code provided by the sample was only touched where needed and was not split up to match our system.
+
+\begin{description}
+	\item[GrabCut] This contains all native code which interfaces the OpenCV GrabCut. This includes storage of the mask, frame etc.
+	\item[Reconstruction] All the relevant code regarding the generation of voxels, projection of them and texture generation is in these files as the Java code just relays the calls.
+	\item[SilhouetteStorage] With this class we provide a storage for silhouettes and model view matrices. This was intended to be able to refine the reconstruction once we have a smaller bounding box. But this was never implemented.
+	\item[ImageTargets.cpp] The sample application has provided most of its code in this file. The most important part in it is the "renderFrame" function call as here is the OpenGL rendering defined.
+	\item[CubeShaders.h] The vertex and fragment shader code is not in the ImageTargets.cpp but in the CubeShaders.h.
+\end{description}
+
+Other files (like SampleMath) are copied from the sample vuforia application and only used for mathematical purposes as multiplying two matrices
+
 
 %-------------------------------------------------------------------------
 \subsection{Grab Cut selection}
