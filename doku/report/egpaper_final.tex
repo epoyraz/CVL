@@ -151,12 +151,22 @@ Other files (like SampleMath) are copied from the sample vuforia application and
 %-------------------------------------------------------------------------
 \subsection{Grab Cut selection}
 
-This explains how the strokes are captured and relayied to the native code
+The selection of the region of interest in the first phase is quite straightforward. We gather all the input coordinates and then unite them in a Android \emph{Rect} object using its \emph{union} function which just expands the rectangle to the point where it contains also this coordinate. Since we have screen coordinates it is easi to draw this rectangle.
+
+In the next step we need to calculate the image coordinates $i$ from the given screen coordinates $h$. This (and the first GrabCut execution) is done in the \emph{RectGrabCutTask}. We need to do this asynchronous to be able to lock and unlock the screen. Most of the figures needed to calculate the image coordinates are precomputed in the \emph{calculateScale} function. Mathematically the computation looks as follows:
+\begin{align} \label{imgCoord}
+	i = \frac{h}{s} + o
+\end{align}
+Here $s$ is the scale of the screen in relation to the image and $o$ denotes the number of pixels of the image outside the screen.
+
+In the next phase of the GrabCut selection the user can input foreground and background strokes. These are stored in a list of strokes (separate for foreground and background). Each of these strokes is stored as a list of coordinates. Since it is not enough to just take all these coordinates to hint GrabCut foreground and background pixels we add all the points on the line between two coordinates of the stroke to the list we pass to the native code. This happens in the function \emph{convertToArray}. During this conversion we also apply the calculation of image coordinates from the screen coordinates as given in equation \ref{imgCoord}.
 
 %-------------------------------------------------------------------------
 \subsection{Matrix handling}
 
-Here we explain how the matrix contents are gathered and used
+As all the used libraries interprete matrices differently we had to experiment quite a lot to find out, who they work together. So we decided to give a short overview how the different libraries use and interprete the matrices.
+
+
 
 %-------------------------------------------------------------------------
 \subsection{Texture usage}
