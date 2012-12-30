@@ -178,7 +178,18 @@ After finishing everything we were stunned to learn the the projection matrix al
 %-------------------------------------------------------------------------
 \subsection{Texture usage}
 
-Here we explain the concept of using a 2D texture to simulate a 3D texture
+Since 3D textures are not really good incorporated in android applications yet we decided to use a 2D texture to simulate a 3D texture. There are two places where this is located in the code - in the \emph{Reconstruction::getTexture} function where the texture is generated and in the fragment shader where the texture is interpolated.
+
+\begin{figure}[h]
+	\begin{center}
+		\includegraphics[width=0.4\linewidth]{./texture.jpg}
+		\caption{An illustration of the 2D texture}
+		\label{fig:texture}
+	\end{center}
+\end{figure}
+The main idea is to place the binary reconstruction data in layers into the texture what then looks like shown in figure \ref{fig:texture} \footnote{Source: http://demos.vicomtech.org/volren/}. This means that we have to set a texel to black when we carve a way its corresponding voxel in the reconstruction. Another problem with the texture is that typically the number of texels doesn't sum up to a power of 2. This is solved by scaling the image with the correct amount of texels to a size of $1024 \times 1024$ which we found is the largest texture reliably generated on an android phone.
+
+In the fragment shader we have to calculate the lookup position within the texture from 3D coordinates. We start this by calculating in which layer we are and locating this layer within the texture. Then we just have to get the correct location within the given layer.
 
 %------------------------------------------------------------------------
 \section{Conclusions}
