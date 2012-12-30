@@ -195,19 +195,41 @@ In the fragment shader we have to calculate the lookup position within the textu
 \section{Conclusions}
 
 %-------------------------------------------------------------------------
-\subsection{Advantages of a mobile solution}
+\subsection{Advantages}
 
-We blable about how nice it is that it is all on the phone now... yay!
+Our implementation combines the advantages of a small recording device with the advantage to interactively improve the quality of the reconstruction where needed. This means that we can gather exactly as much pictures as needed to get a decent reconstruction of the object. The reconstruction is already displayed while improving it is still possible. So if we see that the reconstruction is not yet good enough an additional picture can easily be taken.
 
-%-------------------------------------------------------------------------
-\subsection{Possible Improvements}
+That the mobile phone is small is another advantage as it can be carried nearly everywhere. Even the marker can be brought along inside the battery compartment if necessairy. Like this reconstructing an object at nearly any time and place is possible.
 
-We tell them what part we screwed up (Multithreading, etc.) As in the presentation.
+Our easy to use interface also improves the quality of the silhouette construction as the user can see the reactions to his input and improve as he goes. This yields quite high quality silhouettes which are necessairy to get a decent reconstruction.
 
 %-------------------------------------------------------------------------
 \subsection{Limitations}
 
-We talk about the problem that only the visual hull can be reconstructed using this technique and that voxel carving would be so much nicer but probably not feasible.
+Our application has mainly the limitations given by the approach of reconstructing using silhouettes. The biggest limitation this yields is that it is only possible to reconstruct the visual hull of the object. But to change this one would have to change the whole approach of using silhouettes.
+
+Additionally it is difficult to acquire high quality pictures using a mobile phone. One reason for this is that we typically don't hold still enough to get completely sharp pictures even if the picture doesn't show it. On the other hand vuforia has the problem that it only delivers images with half the resolution of the screen. This is good for our computation time as otherwise the GrabCut probably would last much longer. But it has a bad impact on the quality of the reconstruction.
+
+Furthermore the limited memory of the mobile device might be a constraint for the reconstruction as it gives a limit on the number of voxels. On the other hand this constraint is typically weaker than the constraint of the missing computation power of the mobile device.
+
+%-------------------------------------------------------------------------
+\subsection{Possible Improvements}
+
+In the first part we want to talk about improvements in the theoretical part and in the second part about technical improvements.
+
+\begin{description}
+	\item[Voxel coloring] Since one of the biggest limitations on the reconstruction is the visual hull one could implement a voxel coloring approach as proposed by S. M. Seitz and C. R. Dyer. \cite{Seitz} Hopefully this could recover much more of the original shape than a silhouette based approach.
+	\item[Multithreading] The most processing time is now spent on calculating the GrabCut. With a parallel implementation one could distribute much load on the multiple cores as well as we could possibly get a GPU powered implementation which would then cut the computation time drastically.
+	\item[Probabilistic reconstruction] A probabilistic reconstruction could yield a smoother reconstruction than a silhouette based approach can. Something similar has  been proposed by J. S. De Bonet and Paul Viola. \cite{Bonet}
+\end{description}
+
+As always when you finished a project there are some things you would have done different in retrospect. Here are the most important:
+
+\begin{description}
+	\item[Octree Representation] In our project we have unstructured voxels which is not really space efficient. Hence we could save a lot memory space and computation time by using a hierarchic octree.
+	\item[Marching Cubes] As the raycasting approach we followed in our project is not able to shade the reconstruction it is sometimes hard to verify that the reconstruction really is correct. This could by improved if we would apply marching cubes to our binary data and generate triangles which we could then shade normally using OpenGL.
+	\item[Refinement] A dynamic refinement step could be introduced once the bounding box containing the object has reduced by some percentage. This would increase the model precision a lot since we do not waste voxel space where we know the object will not be.
+\end{description}
 
 
 {\small
