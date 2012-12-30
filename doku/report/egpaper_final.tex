@@ -166,7 +166,14 @@ In the next phase of the GrabCut selection the user can input foreground and bac
 
 As all the used libraries interprete matrices differently we had to experiment quite a lot to find out, who they work together. So we decided to give a short overview how the different libraries use and interprete the matrices.
 
+\begin{description}
+	\item[OpenGL] The matrix has to be stored column-wise in an array to be correctly interpreted by OpenGL.
+	\item[vuforia] Since OpenGL needs a column-wise array vuforia has its matrix class use the same storage format. They even have some matrix handling code such as multiplication. Images on the other hand are stored row-wise. When using channeled data (RGB) they store the three channels after each other for a single pixel.
+	\item[OpenCV] OpenCV expects all matrix and image data to be stored row-wise. This means to get the correct matrix from vuforia you have to process them before feeding it into OpenCV. The image data is perfectly preprocessed for OpenCV.
+	\item[Java] When feeding data from OpenCV to Java one has to pay attention not to forget to change the format from RGB to RGBA as we assumed it to be easiest to pass the data in this format to the Java \emph{Bitmap}.
+\end{description}
 
+After finishing everything we were stunned to learn the the projection matrix also had to be mirrored to yield the correct reconstruction. We assume that OpenGL itself introduces this mirroring when projecting elements on the screen but to find the correct location within the silhouette we had to introduce the mirroring ourselves.
 
 %-------------------------------------------------------------------------
 \subsection{Texture usage}
