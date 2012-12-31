@@ -45,7 +45,7 @@ ETH Zurich\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-In this work we describe the realization of a live 3D-reconstruction on a mobile platform by taking pictures and calculating the silhoutte of an object of interest. The object is placed on a AR image marker which is used to determine the camera position. As a result of multiple images as input we were able to reconstruct a 3D-model of a physical object. The code is available at : https://github.com/epoyraz/CVL
+In this work we describe the realization of a live 3D-reconstruction on a mobile platform by taking pictures and calculating the silhouette of an object of interest. The object is placed on a AR image marker which is used to determine the camera position. As a result of multiple images as input we were able to reconstruct a 3D-model of a physical object. The code is available at https://github.com/epoyraz/CVL
 
 \end{abstract}
 
@@ -83,14 +83,14 @@ The input is a rectangle which fully contains the foreground object and possibly
 	\item[Probably background] Pixels the algorithm assumes are background.
 \end{description}
 
-We didn't actually implement GrabCut as the OpenCV library presents an all ready implementation of the GrabCut as presented by C. Rother \etal \cite{Rother}. Our contribution was to implement an easy to use interface in our application.
+We didn't actually implement GrabCut as the OpenCV library presents a fully functional implementation of the GrabCut as presented by C. Rother \etal \cite{Rother}. Our contribution was to implement an easy to use interface in our application.
 
 %-------------------------------------------------------------------------
 \subsection{3D Reconstruction}
 
 The first approach to this problem would have been to use the paper "Exact Voxel Occupancy with Graph Cuts" by D. Snow \etal \cite{Snow} Sadly this approach turned out to be computationally too expensive as well as too cumbersome to use on an android device as this would have meant to compile another library to android native code.
 
-We found a more basic approach in the papers of M. Potmesil \cite{Potmesil} and T.-H. Hong and M. O. Shneier \cite{Hong} which only wanted to find obstacles in the surroundings of robots. But their method is perfectly applicable for our purposes. We simplified the approach to not have an octree structure but just a large amount of equally sized cubes - so called voxels. This spared us the work on an octree structure while not sacrificing so much computing time.
+We found a more basic approach in the papers of M. Potmesil \cite{Potmesil} and T.-H. Hong and M. O. Shneier \cite{Hong}. While they only wanted to find obstacles in the surroundings of robots their method is also perfectly applicable for our purposes. We simplified the approach to not have an octree structure but just a large amount of equally sized cubes - so called voxels. This spared us the work on an octree structure while not sacrificing so much computing time.
 
 Our program just generates voxels in the area we expect the object to be in. Each such voxel is then projected onto the silhouette. This is done using both the camera matrix $K$ and the model view matrix $M$ which contains the camera rotation and translation. This then yields the projection formula of the voxel position $v$ to image coordinates $i$:
 \begin{align}
@@ -103,7 +103,7 @@ This leads to an always decreasing number of voxels which makes each successive 
 %-------------------------------------------------------------------------
 \subsection{Volume Rendering}
 
-The Volume renderer is realiazed through the fragment shader by taking the texture as input. Initially an opaque cube is projected on the space. First we calculated the entry and the exit position of the ray (see figure 1,A). Inside this ray we then subdivided the path in 50 equidistant points (see figure 1,B). For each point we test, if the ray hits the object. If it does the voxel remains opaque and the ray terminates early, otherwise the voxels will be transparent. 
+The Volume renderer is realized through the fragment shader by taking the texture as input. Initially an opaque cube is projected on the space. First we calculated the entry and the exit position of the ray (see figure 1,A). Inside this ray we then subdivided the path in 50 equidistant points (see figure 1,B). For each point we test, if the ray hits the object. If it does the voxel remains opaque and the ray terminates early, otherwise the voxels will be transparent. 
 \begin{figure}[h]
 	\begin{center}
 		\includegraphics[width=0.8\linewidth]{./raycast.jpg}
@@ -115,7 +115,7 @@ The Volume renderer is realiazed through the fragment shader by taking the textu
 %-------------------------------------------------------------------------
 \section{The Application}
 
-Now that all the necessairy knowledge is introduced we would like to go into some parts of our project in depth.
+Now that all the necessary knowledge is introduced we would like to go into some parts of our project in depth.
 
 %-------------------------------------------------------------------------
 \subsection{Classes}
@@ -127,7 +127,7 @@ Now that all the necessairy knowledge is introduced we would like to go into som
 	\item[S3DRenderer] : GLSurfaceView.Renderer\\
 		The S3DRenderer is mainly an interface class which relays all calls to native code.
 	\item[QCARSampleGLView] : GLSurfaceView\\
-		This contains mostly initialization functions as well as an onTouch listener used to determine when the user wants to take a picture.
+		This contains mostly initialization functions as well as an \emph{onTouch} listener used to determine when the user wants to take a picture.
 	\item[GrabCutView] : ImageView\\
 		All input and displaying regarding the GrabCut is done in this view. This means capturing the finger strokes, computing the boundary rectangle and preparing the data for the native code.
 	\item[Reconstruction] \quad \\
@@ -141,9 +141,9 @@ When applicable we split our new code into three parts per class - the header fi
 
 \begin{description}
 	\item[GrabCut] This contains all native code which interfaces the OpenCV GrabCut. This includes storage of the mask, frame etc.
-	\item[Reconstruction] All the relevant code regarding the generation of voxels, projection of them and texture generation is in these files as the Java code just relays the calls.
-	\item[SilhouetteStorage] With this class we provide a storage for silhouettes and model view matrices. This was intended to be able to refine the reconstruction once we have a smaller bounding box. But this was never implemented.
-	\item[ImageTargets.cpp] The sample application has provided most of its code in this file. The most important part in it is the "renderFrame" function call as here is the OpenGL rendering defined.
+	\item[Reconstruction] All the relevant code regarding the generation and projection of voxels and texture generation is in these files as the Java code just relays the calls.
+	\item[SilhouetteStorage] With this class we provide storage for silhouettes and model view matrices. This was intended to be able to refine the reconstruction once we have a smaller bounding box. But this was never implemented.
+	\item[ImageTargets.cpp] The sample application has provided most of its code in this file. The most important part in it is the \emph{renderFrame} function call as here is the OpenGL rendering defined.
 	\item[CubeShaders.h] The vertex and fragment shader code is not in the ImageTargets.cpp but in the CubeShaders.h.
 \end{description}
 
@@ -153,7 +153,7 @@ Other files (like SampleMath) are copied from the sample vuforia application and
 %-------------------------------------------------------------------------
 \subsection{Grab Cut selection}
 
-The selection of the region of interest in the first phase is quite straightforward. We gather all the input coordinates and then unite them in a Android \emph{Rect} object using its \emph{union} function which just expands the rectangle to the point where it contains also this coordinate. Since we have screen coordinates it is easi to draw this rectangle.
+The selection of the region of interest in the first phase is quite straightforward. We gather all the input coordinates and then unite them in an Android \emph{Rect} object using its \emph{union} function which just expands the rectangle to the point where it contains also this coordinate. Since we have screen coordinates it is easy to draw this rectangle.
 
 In the next step we need to calculate the image coordinates $i$ from the given screen coordinates $h$. This (and the first GrabCut execution) is done in the \emph{RectGrabCutTask}. We need to do this asynchronous to be able to lock and unlock the screen. Most of the figures needed to calculate the image coordinates are precomputed in the \emph{calculateScale} function. Mathematically the computation looks as follows:
 \begin{align} \label{imgCoord}
@@ -166,7 +166,7 @@ In the next phase of the GrabCut selection the user can input foreground and bac
 %-------------------------------------------------------------------------
 \subsection{Matrix handling}
 
-As all the used libraries interprete matrices differently we had to experiment quite a lot to find out, who they work together. So we decided to give a short overview how the different libraries use and interprete the matrices.
+As all the used libraries interpret matrices differently we had to experiment quite a lot to find out, who they work together. So we decided to give a short overview how the different libraries use and interpret the matrices.
 
 \begin{description}
 	\item[OpenGL] The matrix has to be stored column-wise in an array to be correctly interpreted by OpenGL.
@@ -175,7 +175,7 @@ As all the used libraries interprete matrices differently we had to experiment q
 	\item[Java] When feeding data from OpenCV to Java one has to pay attention not to forget to change the format from RGB to RGBA as we assumed it to be easiest to pass the data in this format to the Java \emph{Bitmap}.
 \end{description}
 
-After finishing everything we were stunned to learn the the projection matrix also had to be mirrored to yield the correct reconstruction. We assume that OpenGL itself introduces this mirroring when projecting elements on the screen but to find the correct location within the silhouette we had to introduce the mirroring ourselves.
+After finishing everything we were stunned to learn that the projection matrix also had to be mirrored to yield the correct reconstruction. We assume that OpenGL itself introduces this mirroring when projecting elements on the screen but to find the correct location within the silhouette we had to introduce the mirroring ourselves.
 
 %-------------------------------------------------------------------------
 \subsection{Texture usage}
@@ -201,9 +201,9 @@ In the fragment shader we have to calculate the lookup position within the textu
 
 Our implementation combines the advantages of a small recording device with the advantage to interactively improve the quality of the reconstruction where needed. This means that we can gather exactly as much pictures as needed to get a decent reconstruction of the object. The reconstruction is already displayed while improving it is still possible. So if we see that the reconstruction is not yet good enough an additional picture can easily be taken.
 
-That the mobile phone is small is another advantage as it can be carried nearly everywhere. Even the marker can be brought along inside the battery compartment if necessairy. Like this reconstructing an object at nearly any time and place is possible.
+That the mobile phone is small is another advantage as it can be carried nearly everywhere. Even the marker can be brought along inside the battery compartment if necessary. Like this reconstructing an object at nearly any time and place is possible.
 
-Our easy to use interface also improves the quality of the silhouette construction as the user can see the reactions to his input and improve as he goes. This yields quite high quality silhouettes which are necessairy to get a decent reconstruction.
+Our easy to use interface also improves the quality of the silhouette construction as the user can see the reactions to his input and improve as he goes. This yields quite high quality silhouettes which are necessary to get a decent reconstruction.
 
 %-------------------------------------------------------------------------
 \subsection{Limitations}
@@ -229,7 +229,7 @@ As always when you finished a project there are some things you would have done 
 
 \begin{description}
 	\item[Octree Representation] In our project we have unstructured voxels which is not really space efficient. Hence we could save a lot memory space and computation time by using a hierarchic octree.
-	\item[Marching Cubes] As the raycasting approach we followed in our project is not able to shade the reconstruction it is sometimes hard to verify that the reconstruction really is correct. This could by improved if we would apply marching cubes to our binary data and generate triangles which we could then shade normally using OpenGL.
+	\item[Marching Cubes] As the volume rendering approach we followed in our project is not able to shade the reconstruction it is sometimes hard to verify that the reconstruction really is correct. This could be improved if we would apply marching cubes to our binary data and generate triangles which we could then shade normally using OpenGL.
 	\item[Refinement] A dynamic refinement step could be introduced once the bounding box containing the object has reduced by some percentage. This would increase the model precision a lot since we do not waste voxel space where we know the object will not be.
 \end{description}
 
